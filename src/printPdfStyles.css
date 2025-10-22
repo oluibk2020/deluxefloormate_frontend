@@ -1,0 +1,62 @@
+/* src/printPdfStyles.css */
+
+/* Apply these styles specifically when preparing for print/PDF */
+.pdf-compatible-blue-bg {
+  background-color: #e0f2fe !important; /* Tailwind's blue-50 is close to this */
+  /* Or rgb(224, 242, 254) */
+}
+
+.pdf-compatible-green-bg {
+  background-color: #ecfdf5 !important; /* Tailwind's green-50 is close to this */
+  /* Or rgb(236, 253, 245) */
+}
+
+.pdf-compatible-yellow-bg {
+  background-color: #fffbeb !important; /* Tailwind's yellow-50 is close to this */
+  /* Or rgb(255, 251, 235) */
+}
+
+.pdf-compatible-purple-bg {
+  background-color: #f3e8ff !important; /* Tailwind's purple-50 is close to this */
+  /* Or rgb(243, 232, 255) */
+}
+
+/* Text colors if they also use advanced functions */
+.pdf-compatible-blue-text {
+  color: #1e40af !important; /* Tailwind's blue-800 is close to this */
+}
+
+.pdf-compatible-green-text {
+  color: #065f46 !important; /* Tailwind's green-800 is close to this */
+}
+
+.pdf-compatible-yellow-text {
+  color: #92400e !important; /* Tailwind's yellow-800 is close to this */
+}
+
+.pdf-compatible-purple-text {
+  color: #6b21a8 !important; /* Tailwind's purple-800 is close to this */
+}
+
+/* Also for border colors if they are problematic */
+.pdf-compatible-blue-border {
+  border-color: #bfdbfe !important; /* Tailwind's blue-200 */
+}
+
+.pdf-compatible-green-border {
+  border-color: #a7f3d0 !important; /* Tailwind's green-200 */
+}
+
+.pdf-compatible-yellow-border {
+  border-color: #fcd34d !important; /* Tailwind's yellow-200 */
+}
+
+.pdf-compatible-purple-border {
+  border-color: #d8b4fe !important; /* Tailwind's purple-200 */
+}
+
+/* Ensure background colors are printed for html2canvas */
+.pdf-compatible-bg {
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}

@@ -1,0 +1,124 @@
+@import "tailwindcss";
+
+
+.loadingSpinnerContainer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 5000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loadingSpinner {
+  width: 64px;
+  height: 64px;
+  border: 8px solid;
+  border-color: #000 transparent #555 transparent;
+  border-radius: 50%;
+  animation: spin 1.2s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.about{
+    height: 47vh;
+    padding-top: 30px;
+}
+
+.active{
+  @apply md:text-pink-500 
+  
+}
+
+/* mobile  */
+@media screen and (max-width: 761px){
+  .active{
+    color: white;
+    background-color: #ec4899;
+  }
+  .productDetail{
+    display: block;
+  }
+}
+
+/* In your CSS file (e.g., index.css) */
+
+@media print {
+  /* Hide elements that shouldn't be printed (like navigation, buttons, etc.) */
+  body {
+    -webkit-print-color-adjust: exact !important; /* For Chrome/Safari */
+    print-color-adjust: exact !important; /* Standard property */
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  /* Adjust margins, padding, and font sizes for print */
+  .printable-content {
+    margin: 0;
+    padding: 0;
+    font-size: 10pt; /* Smaller font size for print */
+  }
+
+  /* Ensure background colors and images are printed if desired */
+  .bg-blue-50,
+  .bg-green-50,
+  .bg-yellow-50,
+  .bg-purple-50 {
+    background-color: #f0f8ff !important; /* Light blue */
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Example: Remove shadows for print */
+  .shadow-lg,
+  .shadow-md {
+    box-shadow: none !important;
+  }
+
+  /* You might want to adjust image sizes or hide them */
+  .printable-content img {
+    max-width: 100px;
+    height: auto;
+  }
+
+  /* Ensure links are styled for print (e.g., show href) */
+  a {
+    text-decoration: none;
+    color: black;
+  }
+
+  a[href]:after {
+    content: " (" attr(href) ")";
+  }
+
+  /* Specific styles for elements within your order details */
+  h1,
+  h2,
+  h3 {
+    color: #333 !important;
+  }
+
+  .border-b {
+    border-bottom: 1px solid #eee !important;
+  }
+
+  /* Ensure flex items stack nicely for print if needed */
+  .flex-col,
+  .sm\:flex-row {
+    flex-direction: column !important;
+  }
+}
