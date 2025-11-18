@@ -1,19 +1,14 @@
 import Profile from "./Profile";
 import { useContext, useEffect } from "react";
 import { storeContext } from "../context/storeContext";
-import { Link, useNavigate } from "react-router-dom";
-import { useJwt } from "react-jwt";
-import { toast } from "react-toastify";
+import { Link} from "react-router-dom";
 import Spinner from "../components/Spinner";
 
 function Orders() {
-  const navigate = useNavigate();
   const {
     orderList,
-    setIsAuth,
     fetchOrders,
     isLoading,
-    setIsLoading,
     fullName,
   } = useContext(storeContext);
 

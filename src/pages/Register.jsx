@@ -1,18 +1,18 @@
 import { Link, useNavigate } from "react-router-dom";
 import { FaUserAlt } from "react-icons/fa";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "react-toastify";
 import Spinner from "../components/Spinner";
 import { useContext } from "react";
-import {storeContext} from "../context/storeContext";
+import { storeContext } from "../context/storeContext";
 
 function Register() {
   const { isLoading, setIsLoading, APP_NAME } = useContext(storeContext);
 
-   const navigate = useNavigate();
+  const navigate = useNavigate();
 
   //website url
-  const API_URL = import.meta.env.VITE_BACKEND_URL;;
+  const API_URL = import.meta.env.VITE_BACKEND_URL;
 
   const [formData, setFormData] = useState({
     first_name: "",
@@ -58,26 +58,34 @@ function Register() {
 
       const data = await response.json();
 
-      if (response.ok) {
-          toast.success("Account created successfully");
-           setFormData({
-             first_name: "",
-             last_name: "",
-             email: "",
-             password: "",
-             password_confirmation: "",
-             mobile: "",
-           });
-           navigate("/login")
-        console.log("success", data);
-      } else{
-       toast.error (data.message);
-       toast.error (data[0].message);
+      if (!response.ok) {
+        const error = data.message;
+
+        if (typeof error === "string") {
+          toast.error(error);
+          setIsLoading(false);
+          return;
+        }
+
+        error.forEach((error) => {
+          toast.error(error);
+        });
+        setIsLoading(false);
+        return;
       }
 
+      toast.success("Account created successfully");
+      setFormData({
+        first_name: "",
+        last_name: "",
+        email: "",
+        password: "",
+        password_confirmation: "",
+        mobile: "",
+      });
+      navigate("/login");
+
       setIsLoading(false);
-      
-      
     } catch (error) {
       console.log(error);
     }
@@ -89,8 +97,8 @@ function Register() {
     if (password !== password_confirmation) {
       toast.error("Passwords do not match");
     } else {
-      setIsLoading(true)
-      createAccount(first_name, last_name, email, mobile, password)
+      setIsLoading(true);
+      createAccount(first_name, last_name, email, mobile, password);
     }
   }
 

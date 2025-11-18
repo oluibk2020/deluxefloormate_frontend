@@ -17,7 +17,6 @@ function Login() {
     isAdmin,
     setIsAdmin,
     setIsManager,
-    isManager,
   } = useContext(storeContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

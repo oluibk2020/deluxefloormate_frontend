@@ -3,8 +3,6 @@ import { useContext, useEffect, useCallback, useRef } from "react";
 import { storeContext } from "../context/storeContext";
 import { Link, useParams } from "react-router-dom";
 import Spinner from "../components/Spinner";
-import html2canvas from "html2canvas"; // Import html2canvas
-import jsPDF from "jspdf"; // Import jsPDF
 
 // Import the CSS file for print and PDF-compatible styles
 import "../printPdfStyles.css";
@@ -20,7 +18,6 @@ function ManageOrderItem() {
     deliveryAddress,
     getDeliveryAddress,
     isManager,
-    isAdmin,
     API_URL,
     APP_NAME,
   } = useContext(storeContext);

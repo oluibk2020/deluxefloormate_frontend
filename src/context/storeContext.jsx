@@ -103,9 +103,21 @@ export const StoreProvider = ({ children }) => {
       });
 
       const data = await response.json();
-      if (!response.ok) {
-        toast.error("We are unable to get this delivery address at the moment");
-      }
+       if (!response.ok) {
+         const error = data.message;
+
+         if (typeof error === "string") {
+           toast.error(error);
+           setIsLoading(false);
+           return;
+         }
+
+         error.forEach((error) => {
+           toast.error(error);
+         });
+         setIsLoading(false);
+         return;
+       }
       setDeliveryAddress(data);
     } catch (error) {
       console.log(error);
@@ -142,10 +154,21 @@ export const StoreProvider = ({ children }) => {
         },
       });
 
-      if (!response.ok) {
-        toast.error("We are unable to get this order at the moment");
-        return;
-      }
+       if (!response.ok) {
+         const error = data.message;
+
+         if (typeof error === "string") {
+           toast.error(error);
+           setIsLoading(false);
+           return;
+         }
+
+         error.forEach((error) => {
+           toast.error(error);
+         });
+         setIsLoading(false);
+         return;
+       }
 
       const data = await response.json();
 
@@ -169,10 +192,21 @@ export const StoreProvider = ({ children }) => {
 
       const data = await response.json();
 
-      if (!response.ok) {
-        toast.error("We are unable to get orders at the moment");
-        return;
-      }
+       if (!response.ok) {
+         const error = data.message;
+
+         if (typeof error === "string") {
+           toast.error(error);
+           setIsLoading(false);
+           return;
+         }
+
+         error.forEach((error) => {
+           toast.error(error);
+         });
+         setIsLoading(false);
+         return;
+       }
 
       // console.log(data);
       setFullName(data.firstName);
@@ -277,10 +311,21 @@ export const StoreProvider = ({ children }) => {
       const response = await fetch(`${API_URL}/product`);
       const data = await response.json();
 
-      if (!response.ok) {
-        toast.error("We are unable to get all products at the moment");
-        return;
-      }
+       if (!response.ok) {
+         const error = data.message;
+
+         if (typeof error === "string") {
+           toast.error(error);
+           setIsLoading(false);
+           return;
+         }
+
+         error.forEach((error) => {
+           toast.error(error);
+         });
+         setIsLoading(false);
+         return;
+       }
 
       setStoreList(data);
     } catch (error) {
@@ -294,10 +339,21 @@ export const StoreProvider = ({ children }) => {
       const response = await fetch(`${API_URL}/product/featured`);
       const data = await response.json();
 
-      if (!response.ok) {
-        toast.error("We are unable to get all products at the moment");
-        return;
-      }
+       if (!response.ok) {
+         const error = data.message;
+
+         if (typeof error === "string") {
+           toast.error(error);
+           setIsLoading(false);
+           return;
+         }
+
+         error.forEach((error) => {
+           toast.error(error);
+         });
+         setIsLoading(false);
+         return;
+       }
 
       setStoreList(data);
     } catch (error) {
@@ -312,10 +368,21 @@ export const StoreProvider = ({ children }) => {
       const response = await fetch(`${API_URL}/product/${id}`);
       const data = await response.json();
 
-      if (!response.ok) {
-        toast.error("We are unable to get this product at the moment");
-        return;
-      }
+       if (!response.ok) {
+         const error = data.message;
+
+         if (typeof error === "string") {
+           toast.error(error);
+           setIsLoading(false);
+           return;
+         }
+
+         error.forEach((error) => {
+           toast.error(error);
+         });
+         setIsLoading(false);
+         return;
+       }
 
       setProductData(data);
       return data;
@@ -330,6 +397,22 @@ export const StoreProvider = ({ children }) => {
     try {
       const response = await fetch(`${API_URL}/category/${id}`);
       const data = await response.json();
+
+       if (!response.ok) {
+               const error = data.message;
+      
+               if (typeof error === "string") {
+                 toast.error(error);
+                 setIsLoading(false);
+                 return;
+               }
+      
+               error.forEach((error) => {
+                 toast.error(error);
+               });
+               setIsLoading(false);
+               return;
+             }
 
       setStoreList(data);
     } catch (error) {
@@ -348,11 +431,26 @@ export const StoreProvider = ({ children }) => {
       );
       const data = await response.json();
 
+       if (!response.ok) {
+         const error = data.message;
+
+         if (typeof error === "string") {
+           toast.error(error);
+           setIsLoading(false);
+           return;
+         }
+
+         error.forEach((error) => {
+           toast.error(error);
+         });
+         setIsLoading(false);
+         return;
+       }
+
       setStoreList(data.products);
       setTotalPages(data.totalPages);
     } catch (error) {
       console.error("Error fetching products:", error);
-      toast.error("Network error");
     }
   }
 

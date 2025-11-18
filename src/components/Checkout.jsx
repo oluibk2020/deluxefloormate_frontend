@@ -67,6 +67,7 @@ function Checkout() {
       }
     } catch (error) {
       toast.error("Sorry! You need to Login");
+      console.log(error);
     }
   }, []);
 

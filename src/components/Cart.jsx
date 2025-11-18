@@ -34,7 +34,7 @@ function Cart() {
 
               <div className="mt-8">
                 <ul className="space-y-4">
-                  {cartData.map((product, index) => {
+                  {cartData.map((product) => {
                     return (
                       <li className="flex items-center gap-4" key={product.id}>
                         <Link to={`/product/${product.id}`}>

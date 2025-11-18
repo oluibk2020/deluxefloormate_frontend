@@ -1,7 +1,6 @@
-import { useContext, useState, useEffect, useMemo, useCallback } from "react";
+import { useContext, useState, useCallback } from "react";
 import { storeContext } from "../context/storeContext";
 import { Link, useNavigate } from "react-router-dom";
-import Spinner from "./Spinner";
 import { toast } from "react-toastify";
 import { FaUserCog } from "react-icons/fa"; // This icon is not used in the original component, but kept if you plan to use it.
 
