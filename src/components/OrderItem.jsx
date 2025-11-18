@@ -42,6 +42,7 @@ function OrderItem() {
   // Update dependent data (time and address) once orderData is available
   useEffect(() => {
     if (orderData && Object.keys(orderData).length > 0) {
+      console.log("order data", orderData);
       if (orderData.order && orderData.order.createdAt) {
         clockConverter(orderData.order.createdAt);
       }
@@ -49,7 +50,7 @@ function OrderItem() {
         getDeliveryAddress(orderData.order.deliveryAddressId);
       }
     }
-  }, [orderData, clockConverter, getDeliveryAddress]); // Depend on orderData and memoized functions
+  }, []); // Depend on orderData and memoized functions
 
   // --- Payment Logic ---
   const payNow = useCallback(async () => {
@@ -81,6 +82,7 @@ function OrderItem() {
 
   // Destructure order and products for easier access after loading
   const { order, products } = orderData;
+  console.log(orderData);
 
   // Calculate VAT based on current order data
   const VAT = (0.075 * order.totalAmount).toFixed(2); // Assuming 7.5% VAT
@@ -190,28 +192,25 @@ function OrderItem() {
               <h2 className="text-xl font-semibold text-yellow-800 mb-4">
                 🚚 Delivery Details
               </h2>
-              {deliveryAddress && Object.keys(deliveryAddress).length > 0 ? (
-                <dl className="space-y-2 text-sm text-gray-700">
-                  <div className="flex justify-between items-start">
-                    <dt className="font-medium">Address:</dt>
-                    <dd className="text-right flex-1 ml-4">
-                      {deliveryAddress.address}
-                    </dd>
-                  </div>
-                  <div className="flex justify-between">
-                    <dt className="font-medium">Mobile Number:</dt>
-                    <dd>{deliveryAddress.mobile}</dd>
-                  </div>
-                  <div className="flex justify-between">
-                    <dt className="font-medium">Full Name:</dt>
-                    <dd>
-                      {deliveryAddress.firstName} {deliveryAddress.lastName}
-                    </dd>
-                  </div>
-                </dl>
-              ) : (
-                <p className="text-gray-600">Loading delivery address...</p>
-              )}
+              <dl className="space-y-2 text-sm text-gray-700">
+                <div className="flex justify-between items-start">
+                  <dt className="font-medium">Address:</dt>
+                  <dd className="text-right flex-1 ml-4">
+                    {order.deliveryAddress.address}
+                  </dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt className="font-medium">Mobile Number:</dt>
+                  <dd>{order.deliveryAddress.mobile}</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt className="font-medium">Full Name:</dt>
+                  <dd>
+                    {order.deliveryAddress.firstName}{" "}
+                    {order.deliveryAddress.lastName}
+                  </dd>
+                </div>
+              </dl>
             </div>
 
             {/* Transaction Details */}

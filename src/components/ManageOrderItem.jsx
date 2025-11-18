@@ -60,8 +60,6 @@ function ManageOrderItem() {
     window.print();
   };
 
-  
-
   // --- Render Loading State ---
   if (isLoading || !orderData || Object.keys(orderData).length === 0) {
     return <Spinner />;
@@ -208,28 +206,25 @@ function ManageOrderItem() {
                 >
                   🚚 Delivery Details
                 </h2>
-                {deliveryAddress && Object.keys(deliveryAddress).length > 0 ? (
-                  <dl className="space-y-2 text-sm text-gray-700">
-                    <div className="flex justify-between items-start">
-                      <dt className="font-medium">Address:</dt>
-                      <dd className="text-right flex-1 ml-4">
-                        {deliveryAddress.address}
-                      </dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="font-medium">Mobile Number:</dt>
-                      <dd>{deliveryAddress.mobile}</dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="font-medium">Full Name:</dt>
-                      <dd>
-                        {deliveryAddress.firstName} {deliveryAddress.lastName}
-                      </dd>
-                    </div>
-                  </dl>
-                ) : (
-                  <p className="text-gray-600">Loading delivery address...</p>
-                )}
+                <dl className="space-y-2 text-sm text-gray-700">
+                  <div className="flex justify-between items-start">
+                    <dt className="font-medium">Address:</dt>
+                    <dd className="text-right flex-1 ml-4">
+                      {order.deliveryAddress.address}
+                    </dd>
+                  </div>
+                  <div className="flex justify-between">
+                    <dt className="font-medium">Mobile Number:</dt>
+                    <dd>{order.deliveryAddress.mobile}</dd>
+                  </div>
+                  <div className="flex justify-between">
+                    <dt className="font-medium">Full Name:</dt>
+                    <dd>
+                      {order.deliveryAddress.firstName}{" "}
+                      {order.deliveryAddress.lastName}
+                    </dd>
+                  </div>
+                </dl>
               </div>
 
               {/* Transaction Details */}
@@ -262,11 +257,20 @@ function ManageOrderItem() {
                   </div>
                   <div className="flex justify-between font-bold text-base mt-4 pt-2 border-t border-gray-200">
                     <dt>Discount:</dt>
-                    <dd>₦{Number(order.discountAmount).toLocaleString()} NGN - {order.discountPaymentStatus} </dd>
+                    <dd>
+                      ₦{Number(order.discountAmount).toLocaleString()} NGN -{" "}
+                      {order.discountPaymentStatus}{" "}
+                    </dd>
                   </div>
                   <div className="flex justify-between !text-lg font-extrabold text-gray-900">
                     <dt>Grand Total:</dt>
-                    <dd>₦{Number(Number(order.totalAmount) - Number(order.discountAmount)).toLocaleString()} NGN </dd>
+                    <dd>
+                      ₦
+                      {Number(
+                        Number(order.totalAmount) - Number(order.discountAmount)
+                      ).toLocaleString()}{" "}
+                      NGN{" "}
+                    </dd>
                   </div>
                 </dl>
               </div>
