@@ -8,8 +8,17 @@ import { storeContext } from "../context/storeContext";
 import { Link } from "react-router-dom";
 
 function Login() {
-  const { isLoading, setIsLoading, setIsAuth, isAuth, API_URL, isAdmin, setIsAdmin, setIsManager, isManager } =
-    useContext(storeContext);
+  const {
+    isLoading,
+    setIsLoading,
+    setIsAuth,
+    isAuth,
+    API_URL,
+    isAdmin,
+    setIsAdmin,
+    setIsManager,
+    isManager,
+  } = useContext(storeContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -36,7 +45,7 @@ function Login() {
   async function loginHandler(e) {
     e.preventDefault();
     setIsLoading(true);
-    if (password.trim().length > 5) {
+    if (password.trim().length > 8) {
       const response = await fetch(`${API_URL}/auth`, {
         method: "POST",
         headers: {
@@ -49,10 +58,26 @@ function Login() {
       });
 
       const data = await response.json();
+      console.log(data);
+      if (!response.ok) {
+        const error = data.message;
+
+        if (typeof error === "string") {
+          toast.error(error);
+          setIsLoading(false);
+          return;
+        }
+
+        error.forEach((error) => {
+          toast.error(error);
+        });
+        setIsLoading(false);
+        return;
+      }
       // console.log(data);
-      if (data.access_token) {
-        localStorage.setItem("token", data.access_token);
-        const token = data.access_token;
+      if (data.accessToken) {
+        localStorage.setItem("token", data.accessToken);
+        const token = data.accessToken;
         let decodedPayload;
         const [, payload] = token.split(".");
         decodedPayload = JSON.parse(atob(payload));
@@ -63,19 +88,19 @@ function Login() {
         } else if (decodedPayload.isManager === true) {
           setIsManager(true);
           navigate("/manager/dashboard");
-        } else{
+        } else {
           setIsAdmin(false);
           setIsManager(false);
           navigate("/orders");
         }
-      } else {
-        toast.error(data);
+
         setEmail("");
         setPassword("");
       }
+
       setIsLoading(false);
     } else {
-      toast.error("Error.password must be at least 5 characters");
+      toast.error("Error.password must be at least 8 characters");
       setIsLoading(false);
     }
   }
@@ -188,6 +213,12 @@ function Login() {
             >
               Sign in
             </button>
+
+            <p className="text-center text-sm">
+              <Link className="underline" to="/resetpassword">
+                Forgotten password?
+              </Link>
+            </p>
 
             <p className="text-center text-sm text-gray-500">
               No account?

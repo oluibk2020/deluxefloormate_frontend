@@ -24,7 +24,8 @@ import ManageOrderItem from "./components/ManageOrderItem";
 import AdminDashboard from "./pages/AdminDashboard";
 import ManageProductItem from "./components/ManageProductItem";
 import ManageRoles from "./components/ManageRoles";
-import ManagerDashboard from "./pages/ManagerDashboard";
+import ResetPassword from "./pages/ResetPassword";
+import ResetVerification from "./components/ResetVerification";
 
 function App() {
   const { isAuth, isAdmin, isManager } = useContext(storeContext);
@@ -40,12 +41,19 @@ function App() {
         <Route path="/product/:id" element={<Product />} />
         <Route path="/admin/product/:id" element={<ManageProductItem />} />
         <Route path="/order/:id" element={isAuth ? <OrderItem /> : <Login />} />
-        <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
+        <Route
+          path="/resetpasswordverification"
+          element={isAuth ? <Orders /> : <ResetVerification />}
+        />
+        <Route
+          path="/resetpassword"
+          element={isAuth ? <Orders /> : <ResetPassword />}
+        />
         <Route path="/logout" element={isAuth ? <Logout /> : <Login />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={isAuth ? <Orders /> : <Login />} />
         <Route path="/orders" element={isAuth ? <Orders /> : <Login />} />
         <Route
           path="/admin/product-upload"
@@ -62,7 +70,9 @@ function App() {
 
         <Route
           path={isManager ? "/manager/dashboard" : "/admin/dashboard"}
-          element={isAuth && (isAdmin || isManager) ? <AdminDashboard /> : <Login />}
+          element={
+            isAuth && (isAdmin || isManager) ? <AdminDashboard /> : <Login />
+          }
         />
         <Route
           path={
@@ -76,12 +86,8 @@ function App() {
           path={isManager ? "/manager/manage-orders" : "/admin/manage-orders"}
           element={
             isAuth && (isAdmin || isManager) ? <ManageOrders /> : <Login />
-          } 
+          }
         />
-        {/* <Route
-          path="/manager/dashboard"
-          element={isAuth && isManager ? <ManagerDashboard /> : <Login />}
-        /> */}
       </Routes>
       <Footer />
     </Router>

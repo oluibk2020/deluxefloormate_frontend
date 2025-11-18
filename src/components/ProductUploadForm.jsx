@@ -16,7 +16,8 @@ function ProductUploadForm() {
     imageFile: null, // Stores the File object
     imageUrl: null, // Stores the URL after successful image upload
     imagePreview: null, // Stores the object URL for preview
-    featured: false
+    featured: false,
+    costPrice: "",
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -110,7 +111,15 @@ function ProductUploadForm() {
   // Function to create the product
   const createProduct = useCallback(
     async (uploadedImageUrl) => {
-      const { title, description, price, quantity, categoryId , featured} = formData;
+      const {
+        title,
+        description,
+        price,
+        quantity,
+        categoryId,
+        featured,
+        costPrice,
+      } = formData;
 
       // Client-side validation for product details
       if (
@@ -119,7 +128,8 @@ function ProductUploadForm() {
         !price ||
         !quantity ||
         !categoryId ||
-        !uploadedImageUrl
+        !uploadedImageUrl ||
+        !costPrice
       ) {
         throw new Error("All product fields and image are required.");
       }
@@ -127,15 +137,16 @@ function ProductUploadForm() {
       const payload = {
         title,
         description,
-        price: parseFloat(price),
+        price: Number(price),
         imageUrl: uploadedImageUrl,
-        categoryId: parseInt(categoryId),
+        categoryId: Number(categoryId),
         quantity: Number(quantity),
-        featured
+        featured: Boolean(featured),
+        cost: Number(costPrice),
       };
 
       try {
-        const response = await fetch(`${API_URL}/products/create`, {
+        const response = await fetch(`${API_URL}/product/create`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -161,13 +172,14 @@ function ProductUploadForm() {
         setFormData({
           title: "",
           description: "",
-          price: "",
+          sellingPrice: "",
           quantity: "",
           categoryId: "",
           imageFile: null,
           imageUrl: null,
           imagePreview: null,
-          featured: false
+          featured: false,
+          costPrice: "",
         });
       } catch (error) {
         console.error("Product creation error:", error);
@@ -300,10 +312,29 @@ function ProductUploadForm() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             <div>
               <label
+                htmlFor="costPrice"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Cost Price
+              </label>
+              <input
+                type="number"
+                id="costPrice"
+                name="costPrice"
+                value={formData.costPrice}
+                onChange={handleInputChange}
+                step="0.01"
+                min="0"
+                required
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              />
+            </div>
+            <div>
+              <label
                 htmlFor="price"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Price
+                Selling Price
               </label>
               <input
                 type="number"
@@ -356,7 +387,6 @@ function ProductUploadForm() {
               <option value="">Select to Feature</option>
               <option value="true">True</option>
               <option value="false">False</option>
-              
             </select>
           </div>
           <div className="mb-4">

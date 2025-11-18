@@ -23,8 +23,8 @@ function ManageRoles() {
   const submitHandler = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_URL}/users/role/manager`, {
-        method: "PUT",
+      const response = await fetch(`${API_URL}/user/role/manager`, {
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -35,12 +35,22 @@ function ManageRoles() {
         }),
       });
 
-      const data = await response.json();
-      if (!response.ok) {
-        toast.error(data.msg || "Unable to update manager status, try again later");
-        console.error("Update failed:", data);
-        return;
-      }
+       const data = await response.json();
+       if (!response.ok) {
+         const error = data.message;
+
+         if (typeof error === "string") {
+           toast.error(error);
+           setIsLoading(false);
+           return;
+         }
+
+         error.forEach((error) => {
+           toast.error(error);
+         });
+         setIsLoading(false);
+         return;
+       }
 
       toast.success("User status updated successfully");
       navigate("/admin/dashboard");

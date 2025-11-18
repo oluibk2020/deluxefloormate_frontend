@@ -1,5 +1,4 @@
 import { createContext, useState, useEffect } from "react";
-import { useJwt } from "react-jwt";
 import { toast } from "react-toastify";
 
 export const storeContext = createContext();
@@ -20,6 +19,7 @@ export const StoreProvider = ({ children }) => {
   const [fullName, setFullName] = useState("User");
   const [isAdmin, setIsAdmin] = useState(false);
   const [isManager, setIsManager] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
 
   //website url
   const API_URL = import.meta.env.VITE_BACKEND_URL;
@@ -103,6 +103,9 @@ export const StoreProvider = ({ children }) => {
       });
 
       const data = await response.json();
+      if (!response.ok) {
+        toast.error("We are unable to get this delivery address at the moment");
+      }
       setDeliveryAddress(data);
     } catch (error) {
       console.log(error);
@@ -131,7 +134,7 @@ export const StoreProvider = ({ children }) => {
   //fetch order data from server
   async function orderFetcher(id) {
     try {
-      const response = await fetch(`${API_URL}/orders/${id}`, {
+      const response = await fetch(`${API_URL}/order/${id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -139,7 +142,13 @@ export const StoreProvider = ({ children }) => {
         },
       });
 
+      if (!response.ok) {
+        toast.error("We are unable to get this order at the moment");
+        return;
+      }
+
       const data = await response.json();
+
       setOrderData(data);
     } catch (error) {
       console.log(error);
@@ -150,7 +159,7 @@ export const StoreProvider = ({ children }) => {
   async function fetchOrders() {
     try {
       setIsLoading(true);
-      const response = await fetch(`${API_URL}/orders`, {
+      const response = await fetch(`${API_URL}/order`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -159,6 +168,12 @@ export const StoreProvider = ({ children }) => {
       });
 
       const data = await response.json();
+
+      if (!response.ok) {
+        toast.error("We are unable to get orders at the moment");
+        return;
+      }
+
       // console.log(data);
       setFullName(data.firstName);
       setOrderList(data);
@@ -181,7 +196,7 @@ export const StoreProvider = ({ children }) => {
       console.log(error);
     }
   }
-  
+
   //add new product to cart
   const addNewProductToCart = (product) => {
     try {
@@ -259,22 +274,34 @@ export const StoreProvider = ({ children }) => {
   //fetch all products
   async function AllProductFetcher() {
     try {
-      const response = await fetch(`${API_URL}/products`);
+      const response = await fetch(`${API_URL}/product`);
       const data = await response.json();
+
+      if (!response.ok) {
+        toast.error("We are unable to get all products at the moment");
+        return;
+      }
 
       setStoreList(data);
     } catch (error) {
       toast.error("We are unable to get all products at the moment");
+      console.log(error);
     }
   }
   //fetch all products
   async function AllFeaturedProductsFetcher() {
     try {
-      const response = await fetch(`${API_URL}/products/featured`);
+      const response = await fetch(`${API_URL}/product/featured`);
       const data = await response.json();
+
+      if (!response.ok) {
+        toast.error("We are unable to get all products at the moment");
+        return;
+      }
 
       setStoreList(data);
     } catch (error) {
+      console.log(error);
       toast.error("We are unable to get all products at the moment");
     }
   }
@@ -282,31 +309,34 @@ export const StoreProvider = ({ children }) => {
   //fetch single product
   async function productFetcher(id) {
     try {
-      const response = await fetch(`${API_URL}/products/${id}`);
+      const response = await fetch(`${API_URL}/product/${id}`);
       const data = await response.json();
+
+      if (!response.ok) {
+        toast.error("We are unable to get this product at the moment");
+        return;
+      }
+
       setProductData(data);
       return data;
     } catch (error) {
       toast.error("We are unable to get this product at the moment");
+      console.log(error);
     }
   }
 
   //fetch products of a category
   async function categoryProductFetcher(id) {
     try {
-      const setId = Number(id);
-      if (setId <= 2) {
-        const response = await fetch(`${API_URL}/categories/${id}`);
-        const data = await response.json();
+      const response = await fetch(`${API_URL}/category/${id}`);
+      const data = await response.json();
 
-        setStoreList(data);
-      } else {
-        return AllProductFetcher();
-      }
+      setStoreList(data);
     } catch (error) {
       toast.error(
         "We are unable to get products of this category at the moment"
       );
+      console.log(error);
     }
   }
 
@@ -314,9 +344,10 @@ export const StoreProvider = ({ children }) => {
   async function queryProduct(categoryId, maxPrice, minPrice, productName) {
     try {
       const response = await fetch(
-        `${API_URL}/products/s?categoryId=${categoryId}&maxPrice=${maxPrice}&minPrice=${minPrice}&name=${productName}&page=${currentPage}`
+        `${API_URL}/product/s?categoryId=${categoryId}&maxPrice=${maxPrice}&minPrice=${minPrice}&name=${productName}&page=${currentPage}`
       );
       const data = await response.json();
+
       setStoreList(data.products);
       setTotalPages(data.totalPages);
     } catch (error) {
@@ -371,6 +402,8 @@ export const StoreProvider = ({ children }) => {
     setIsAdmin,
     isManager,
     setIsManager,
+    userEmail,
+    setUserEmail,
   };
 
   return (

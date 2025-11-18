@@ -94,10 +94,23 @@ function Checkout() {
     return <Spinner />;
   }
 
+
   //create delivery address
   async function createDeliveryAddress() {
+    // safe JSON parser for responses that may have empty bodies
+    async function safeParseJSON(resp) {
+      const text = await resp.text();
+      if (!text) return null;
+      try {
+        return JSON.parse(text);
+      } catch {
+        return null;
+      }
+    }
+
     try {
       setIsLoading(true);
+
       const response = await fetch(`${API_URL}/delivery/add`, {
         method: "POST",
         headers: {
@@ -112,52 +125,45 @@ function Checkout() {
         }),
       });
 
-      const data = await response.json();
+      const deliveryData = await safeParseJSON(response);
 
-      if (response.status === 201) {
+      if (response.ok) {
         toast.success("Delivery created successfully");
-        //clear form
-        // setFormData({
-        //   delivery_first_name: "",
-        //   delivery_last_name: "",
-        //   delivery_address: "",
-        //   delivery_phone: "",
-        // });
+        console.log(deliveryData);
+        const deliveryId = deliveryData?.id;
 
-        //create order
-        createOrder(data.id);
+        //create an order with delivery Id
+        const orderResponse = await fetch(`${API_URL}/order`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            deliveryAddressId: deliveryId,
+            cartItems: cartData,
+            paymentMethod: paymentMethod,
+          }),
+        });
 
-        return;
-      } else {
-        console.log(data);
-        return;
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
+        const orderData = await safeParseJSON(orderResponse);
+        console.log(orderData);
 
-  //send cartitems and deliveryId to server
-  async function createOrder(deliveryId) {
-    try {
-      setIsLoading(true);
-      const response = await fetch(`${API_URL}/orders`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          deliveryAddressId: deliveryId,
-          cartItems: cartData,
-          paymentMethod: paymentMethod,
-        }),
-      });
+        if (!orderResponse.ok) {
+          const error = orderData?.message ?? "Unknown error";
 
-      const data = await response.json();
+          if (typeof error === "string") {
+            toast.error(error);
+            setIsLoading(false);
+            return;
+          }
 
-      if (response.status === 201) {
-        toast.success("Invoice has been created successfully");
+          (error || []).forEach((err) => {
+            toast.error(err);
+          });
+          setIsLoading(false);
+          return;
+        }
 
         if (paymentMethod === "cash") {
           toast.info("Your order has been created successfully.");
@@ -172,20 +178,82 @@ function Checkout() {
         }
 
         //for flutterwave payment
-        createGatewayInvoice(data.id); //generate payment link
-        console.log("orderId", data.id);
-        console.log("totalAmount", data.totalAmount);
+        createGatewayInvoice(orderData?.id); //generate payment link
         setCartData([]); //clear cart after order is created
         setIsLoading(false);
         return;
       } else {
-        toast.error(data.msg);
+        const errMsg =
+          deliveryData?.message ?? "Error creating delivery address";
+        toast.error(errMsg);
+        setIsLoading(false);
+        console.log(deliveryData);
         return;
       }
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      console.error(err);
+      toast.error("An error occurred while creating delivery.");
+      setIsLoading(false);
     }
   }
+
+  //send cartitems and deliveryId to server
+  // async function createOrder(deliveryId) {
+  //   try {
+  //     const response = await fetch(`${API_URL}/order`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //       body: JSON.stringify({
+  //         deliveryAddressId: deliveryId,
+  //         cartItems: cartData,
+  //         paymentMethod: paymentMethod,
+  //       }),
+  //     });
+
+  //     const data = await response.json();
+  //     console.log(data);
+  //     if (!response.ok) {
+  //       const error = data.message;
+
+  //       if (typeof error === "string") {
+  //         toast.error(error);
+  //         setIsLoading(false);
+  //         return;
+  //       }
+
+  //       error.forEach((error) => {
+  //         toast.error(error);
+  //       });
+  //       setIsLoading(false);
+  //       return;
+  //     }
+
+  //     if (paymentMethod === "cash") {
+  //       toast.info("Your order has been created successfully.");
+  //       setCartData([]);
+  //       //navigate
+  //       isAdmin || isManager
+  //         ? navigate(`/${isAdmin ? "admin" : "manager"}/manage-orders`)
+  //         : navigate("/orders");
+
+  //       setIsLoading(false);
+  //       return;
+  //     }
+
+  //     //for flutterwave payment
+  //     createGatewayInvoice(data.id); //generate payment link
+  //     console.log("orderId", data.id);
+  //     console.log("totalAmount", data.totalAmount);
+  //     setCartData([]); //clear cart after order is created
+  //     setIsLoading(false);
+  //     return;
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // }
 
   function onSubmitHandler(e) {
     e.preventDefault();

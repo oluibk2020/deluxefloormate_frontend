@@ -42,20 +42,15 @@ function ManageProducts() {
 
   // Fetch all products on component mount (if not already fetched)
   useEffect(() => {
-    // You might want to add a check here if AllProductFetcher only fetches
-    // products when storeList is empty or on specific conditions to avoid
-    // unnecessary API calls if the data is already in context.
-    // For example: if (storeList.length === 0) AllProductFetcher();
-    if (!storeList || storeList.length === 0) {
-      AllProductFetcher();
-    }
-  }, [AllProductFetcher, storeList]); // Depend on AllProductFetcher and storeList
+
+    AllProductFetcher();
+  }, []); // Depend on AllProductFetcher and storeList
 
   const updateProductHandler = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_URL}/products/update/${productId}`, {
-        method: "PUT",
+      const response = await fetch(`${API_URL}/product/update/${productId}`, {
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -63,19 +58,28 @@ function ManageProducts() {
         body: JSON.stringify({
           title: title,
           description: description,
-          price: parseFloat(price),
-          categoryId: parseInt(categoryId),
-          quantity: parseInt(quantity),
-          cost: parseFloat(cost),
+          price: Number(price),
+          quantity: Number(quantity),
+          cost: Number(cost),
         }),
       });
 
-      const data = await response.json();
-      if (!response.ok) {
-        toast.error(data.msg || "Unable to update product, try again later");
-        console.error("Update failed:", data);
-        return;
-      }
+       const data = await response.json();
+       if (!response.ok) {
+         const error = data.message;
+
+         if (typeof error === "string") {
+           toast.error(error);
+           setIsLoading(false);
+           return;
+         }
+
+         error.forEach((error) => {
+           toast.error(error);
+         });
+         setIsLoading(false);
+         return;
+       }
 
       toast.success("Product updated successfully");
       await AllProductFetcher(); // Refresh the product list after update
@@ -116,7 +120,7 @@ function ManageProducts() {
 
       setIsLoading(true);
       try {
-        const response = await fetch(`${API_URL}/products/delete/${id}`, {
+        const response = await fetch(`${API_URL}/product/delete/${id}`, {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
@@ -124,16 +128,24 @@ function ManageProducts() {
           },
         });
 
-        const data = await response.json();
-        if (!response.ok) {
-          toast.error(
-            data.msg || "Unable to delete a product, try again later"
-          );
-          console.error("Delete failed:", data);
-          return;
-        }
+         const data = await response.json();
+         if (!response.ok) {
+           const error = data.message;
 
-        toast.success(data.msg);
+           if (typeof error === "string") {
+             toast.error(error);
+             setIsLoading(false);
+             return;
+           }
+
+           error.forEach((error) => {
+             toast.error(error);
+           });
+           setIsLoading(false);
+           return;
+         }
+
+        toast.success("Product deleted successfully");
         await AllProductFetcher(); // Refresh the product list after deletion
       } catch (error) {
         console.error("Error deleting product:", error);

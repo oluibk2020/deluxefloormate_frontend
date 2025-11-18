@@ -42,7 +42,7 @@ function Register() {
   //create Account
   async function createAccount(firstName, lastName, email, mobile, password) {
     try {
-      const response = await fetch(`${API_URL}/users`, {
+      const response = await fetch(`${API_URL}/user`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -58,7 +58,7 @@ function Register() {
 
       const data = await response.json();
 
-      if (response.status === 200) {
+      if (response.ok) {
           toast.success("Account created successfully");
            setFormData({
              first_name: "",
@@ -71,6 +71,7 @@ function Register() {
            navigate("/login")
         console.log("success", data);
       } else{
+       toast.error (data.message);
        toast.error (data[0].message);
       }
 

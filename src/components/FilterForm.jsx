@@ -101,7 +101,7 @@ function FilterForm() {
                 <button
                   type="button"
                   onClick={resetPriceSearch}
-                  className="text-sm text-gray-900 underline underline-offset-4"
+                  className="text-sm text-gray-900 underline underline-offset-4 cursor-pointer"
                 >
                   Reset
                 </button>
@@ -121,7 +121,7 @@ function FilterForm() {
                       onChange={onChange}
                       value={filterProductName}
                       name="filterProductName"
-                      className="rounded-md border-gray-200 shadow-sm sm:text-sm w-full form-control h-10"
+                      className="rounded-md border-gray-200 shadow-sm sm:text-sm w-full form-control h-10 px-2"
                     />
                   </label>
 
@@ -136,7 +136,7 @@ function FilterForm() {
                       id="FilterPriceFrom"
                       placeholder="From 10000"
                       required
-                      className="w-full rounded-md border-gray-200 shadow-sm sm:text-sm h-10"
+                      className="w-full rounded-md border-gray-200 shadow-sm sm:text-sm h-10 px-2"
                       onChange={onChange}
                       value={filterPriceFrom}
                       name="filterPriceFrom"
@@ -157,7 +157,7 @@ function FilterForm() {
                       onChange={onChange}
                       value={filterPriceTo}
                       name="filterPriceTo"
-                      className="rounded-md border-gray-200 shadow-sm sm:text-sm w-full form-control h-10"
+                      className="rounded-md border-gray-200 shadow-sm sm:text-sm w-full form-control h-10 px-2"
                     />
                   </label>
 
@@ -165,7 +165,7 @@ function FilterForm() {
                     id="SortBy"
                     required
                     onClick={filterCategory}
-                    className="h-10 rounded border-gray-300 text-sm w-16 border"
+                    className="h-10 rounded border-gray-300 text-sm w-full border"
                   >
                     <option value="1">7ft * 10ft Rugs</option>
                     <option value="2">Throw pillows</option>
@@ -185,7 +185,7 @@ function FilterForm() {
 
                   <button
                     type="submit"
-                    className="btn btn-secondary text-sm btn-sm"
+                    className="h-10 rounded border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 cursor-pointer"
                   >
                     Search
                   </button>
@@ -205,7 +205,7 @@ function FilterForm() {
           onClick={selectCategory}
           className="h-10 rounded border-gray-300 text-sm"
         >
-          <option value="3">All</option>
+          <option value="2000">All</option>
           <option value="1">7ft * 10ft Rugs</option>
           <option value="2">Throw pillows</option>
           <option value="3">5ft * 7ft Rugs</option>

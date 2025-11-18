@@ -9,7 +9,8 @@ function ManageOrders() {
   const [price, setPrice] = useState("");
   const [discountAmountFromServer, setDiscountAmountFromServer] = useState(0);
   const [discountAmount, setDiscountAmount] = useState(0);
-  const [discountPaymentStatusFromServer, setDiscountPaymentStatusFromServer] = useState("");
+  const [discountPaymentStatusFromServer, setDiscountPaymentStatusFromServer] =
+    useState("");
   const [discountPaymentStatus, setDiscountPaymentStatus] = useState("pending");
   const [paymentMethod, setPaymentMethod] = useState("");
   const [newPaymentStatus, setNewPaymentStatus] = useState("");
@@ -18,20 +19,28 @@ function ManageOrders() {
   const [editMode, setEditMode] = useState(false);
   const [orderId, setOrderId] = useState(null);
   const [soretdOrders, setSortedOrders] = useState([]);
-  const { API_URL, token, isLoading, setIsLoading, orderList, fetchOrders, isAdmin, isManager } =
-    useContext(storeContext);
+  const {
+    API_URL,
+    token,
+    isLoading,
+    setIsLoading,
+    orderList,
+    fetchOrders,
+    isAdmin,
+    isManager,
+  } = useContext(storeContext);
 
+  async function fetchOrdersHandler() {
+    const data = await fetchOrders();
+
+    //sort lessons
+    const sortedOrders = _.orderBy(data.orders, ["createdAt"], ["desc"]);
+    setSortedOrders(sortedOrders);
+    console.log(sortedOrders);
+
+    setIsLoading(false);
+  }
   useEffect(() => {
-    async function fetchOrdersHandler() {
-      const data = await fetchOrders();
-
-      //sort lessons
-      const sortedOrders = _.orderBy(data.orders, ["createdAt"], ["desc"]);
-      setSortedOrders(sortedOrders);
-      console.log(sortedOrders);
-
-      setIsLoading(false);
-    }
     fetchOrdersHandler();
   }, []);
 
@@ -73,14 +82,14 @@ function ManageOrders() {
         return;
       }
 
-      const response = await fetch(`${API_URL}/orders/update/${orderId}`, {
-        method: "PUT",
+      const response = await fetch(`${API_URL}/order/update/${orderId}`, {
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          otp: Number(otp),
+          otp: String(otp),
           transactionStatus: newPaymentStatus,
           discountAmount: Number(discountAmount),
           discountPaymentStatus: discountPaymentStatus,
@@ -89,15 +98,23 @@ function ManageOrders() {
 
       const data = await response.json();
       if (!response.ok) {
-        toast.error(data.msg);
-        toast.error("Unable to update Order, try again later");
+        const error = data.message;
+
+        if (typeof error === "string") {
+          toast.error(error);
+          setIsLoading(false);
+          return;
+        }
+
+        error.forEach((error) => {
+          toast.error(error);
+        });
         setIsLoading(false);
-        console.log(data);
         return;
       }
 
       toast.success("Order updated successfully");
-      fetchOrders(); // update the order list
+      fetchOrdersHandler(); // update the order list
       clearForm();
       setIsLoading(false);
       setEditMode(false);
@@ -126,7 +143,7 @@ function ManageOrders() {
 
     try {
       setIsLoading(true);
-      const response = await fetch(`${API_URL}/orders/delete/${id}`, {
+      const response = await fetch(`${API_URL}/order/delete/${id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -136,9 +153,18 @@ function ManageOrders() {
 
       const data = await response.json();
       if (!response.ok) {
-        toast.error("Unable to delete an order, try again later");
+        const error = data.message;
+
+        if (typeof error === "string") {
+          toast.error(error);
+          setIsLoading(false);
+          return;
+        }
+
+        error.forEach((error) => {
+          toast.error(error);
+        });
         setIsLoading(false);
-        console.log(data);
         return;
       }
 
@@ -154,7 +180,7 @@ function ManageOrders() {
   async function generateTokenHandler() {
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_URL}/token/create`, {
+      const response = await fetch(`${API_URL}/token/admin/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -164,9 +190,18 @@ function ManageOrders() {
 
       const data = await response.json();
       if (!response.ok) {
-        toast.error("Unable to generate token, try again later");
+        const error = data.message;
+
+        if (typeof error === "string") {
+          toast.error(error);
+          setIsLoading(false);
+          return;
+        }
+
+        error.forEach((error) => {
+          toast.error(error);
+        });
         setIsLoading(false);
-        console.log("Error",data);
         return;
       }
 
@@ -287,12 +322,11 @@ function ManageOrders() {
                 className="block text-gray-700 text-sm font-bold mb-2"
                 htmlFor="discountStatus"
               >
-               Choose Discount Status(Optional)
+                Choose Discount Status(Optional)
               </label>
               <select
                 className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out"
                 id="discountStatus"
-               
                 value={discountPaymentStatus}
                 onChange={(e) => setDiscountPaymentStatus(e.target.value)}
               >
@@ -418,37 +452,40 @@ function ManageOrders() {
                         >
                           View
                         </Link>
-                        <button
-                          onClick={() => {
-                            setEditMode(true);
+                        {order.transactionStatus !== "failed" && (
+                          <button
+                            onClick={() => {
+                              setEditMode(true);
 
-                            //set the form values
-                            const totalAmount = Number(
-                              order.totalAmount
-                            ).toLocaleString();
+                              //set the form values
+                              const totalAmount = Number(
+                                order.totalAmount
+                              ).toLocaleString();
 
-                            setOrderId(order.id);
-                            setPrice(totalAmount);
-                            setPaymentMethod(order.paymentMethod);
-                            setTransactionStatus(order.transactionStatus);
-                            setDiscountAmount(order.discountAmount);
-                            setDiscountAmountFromServer(order.discountAmount);
-                            setDiscountPaymentStatusFromServer(
-                              order.discountPaymentStatus
-                            );
-                            setDiscountPaymentStatus(
-                              order.discountPaymentStatus
-                            );
-                            //navigate to the update form
-                            document
-                              .getElementById("updateOrderForm")
-                              .scrollIntoView({ behavior: "smooth" });
-                          }}
-                          type="button"
-                          className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-gray-800 bg-yellow-400 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-300 transition duration-150 ease-in-out"
-                        >
-                          Edit
-                        </button>
+                              setOrderId(order.id);
+                              setPrice(totalAmount);
+                              setPaymentMethod(order.paymentMethod);
+                              setTransactionStatus(order.transactionStatus);
+                              setDiscountAmount(order.discountAmount);
+                              setDiscountAmountFromServer(order.discountAmount);
+                              setDiscountPaymentStatusFromServer(
+                                order.discountPaymentStatus
+                              );
+                              setDiscountPaymentStatus(
+                                order.discountPaymentStatus
+                              );
+                              //navigate to the update form
+                              document
+                                .getElementById("updateOrderForm")
+                                .scrollIntoView({ behavior: "smooth" });
+                            }}
+                            type="button"
+                            className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-gray-800 bg-yellow-400 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-300 transition duration-150 ease-in-out"
+                          >
+                            Edit
+                          </button>
+                        )}
+
                         {isAdmin && (
                           <button
                             type="button"
