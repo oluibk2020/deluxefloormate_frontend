@@ -29,8 +29,7 @@ function Home() {
                   </h2>
 
                   <p className="mt-4 text-gray-500">
-                    Lorem ipsum, dolor sit amet consectetur adipisicing elit.
-                    Quas rerum quam amet provident nulla error!
+                    Welcome to our online store! Shop all your favourite footmats, rugs, home decoration items and much more!
                   </p>
                 </header>
 

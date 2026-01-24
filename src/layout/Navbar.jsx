@@ -26,6 +26,7 @@ function Navbar() {
         <section className="relative mx-auto">
           <nav className="flex justify-between bg-gray-900 text-white w-screen">
             <div className="px-5 xl:px-12 py-6 flex w-full items-center">
+                {/* <img src="/deluxelogo.png" alt="deluxefloor mate logo" className="h-14 w-14 " /> */}
               <div className="flex-none px-2 mx-2">
                 <GiShop className="text-3xl inline pr-2" />
                 <Link to="/" className="text-lg font-bold">
