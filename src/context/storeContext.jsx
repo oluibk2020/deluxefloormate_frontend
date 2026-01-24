@@ -48,10 +48,9 @@ export const StoreProvider = ({ children }) => {
       const localStorageToken = token;
       //set fullName from token
 
-      console.log(localStorageToken);
+      // console.log(localStorageToken);
       const tokenExpiryStatus = isTokenExpired(localStorageToken);
       if (tokenExpiryStatus === false) {
-        console.log("token not false");
         setIsAuth(true);
         fetchOrders();
         if (decodedPayload.isAdmin === true) {
@@ -84,11 +83,10 @@ export const StoreProvider = ({ children }) => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
 
     const data = await response.json();
-    console.log(data.response.data.link);
     setPaymentLink(data.response.data.link);
   }
 
@@ -103,21 +101,21 @@ export const StoreProvider = ({ children }) => {
       });
 
       const data = await response.json();
-       if (!response.ok) {
-         const error = data.message;
+      if (!response.ok) {
+        const error = data.message;
 
-         if (typeof error === "string") {
-           toast.error(error);
-           setIsLoading(false);
-           return;
-         }
+        if (typeof error === "string") {
+          toast.error(error);
+          setIsLoading(false);
+          return;
+        }
 
-         error.forEach((error) => {
-           toast.error(error);
-         });
-         setIsLoading(false);
-         return;
-       }
+        error.forEach((error) => {
+          toast.error(error);
+        });
+        setIsLoading(false);
+        return;
+      }
       setDeliveryAddress(data);
     } catch (error) {
       console.log(error);
@@ -143,6 +141,25 @@ export const StoreProvider = ({ children }) => {
     }
   }
 
+  //LOGOUT
+  async function logOut() {
+    try {
+      const response = await fetch(`${API_URL}/auth/logout`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        toast.success("Logged out from server");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   //fetch order data from server
   async function orderFetcher(id) {
     try {
@@ -154,21 +171,21 @@ export const StoreProvider = ({ children }) => {
         },
       });
 
-       if (!response.ok) {
-         const error = data.message;
+      if (!response.ok) {
+        const error = data.message;
 
-         if (typeof error === "string") {
-           toast.error(error);
-           setIsLoading(false);
-           return;
-         }
+        if (typeof error === "string") {
+          toast.error(error);
+          setIsLoading(false);
+          return;
+        }
 
-         error.forEach((error) => {
-           toast.error(error);
-         });
-         setIsLoading(false);
-         return;
-       }
+        error.forEach((error) => {
+          toast.error(error);
+        });
+        setIsLoading(false);
+        return;
+      }
 
       const data = await response.json();
 
@@ -192,21 +209,21 @@ export const StoreProvider = ({ children }) => {
 
       const data = await response.json();
 
-       if (!response.ok) {
-         const error = data.message;
+      if (!response.ok) {
+        const error = data.message;
 
-         if (typeof error === "string") {
-           toast.error(error);
-           setIsLoading(false);
-           return;
-         }
+        if (typeof error === "string") {
+          toast.error(error);
+          setIsLoading(false);
+          return;
+        }
 
-         error.forEach((error) => {
-           toast.error(error);
-         });
-         setIsLoading(false);
-         return;
-       }
+        error.forEach((error) => {
+          toast.error(error);
+        });
+        setIsLoading(false);
+        return;
+      }
 
       // console.log(data);
       setFullName(data.firstName);
@@ -246,7 +263,7 @@ export const StoreProvider = ({ children }) => {
     try {
       // Check if the product with productId is already in the cart
       const productIndex = cartData.findIndex(
-        (cartItem) => cartItem.id === productId
+        (cartItem) => cartItem.id === productId,
       );
 
       if (productIndex !== -1) {
@@ -276,7 +293,7 @@ export const StoreProvider = ({ children }) => {
     try {
       // Check if the product with productId is already in the cart
       const productIndex = cartData.findIndex(
-        (cartItem) => cartItem.id === productId
+        (cartItem) => cartItem.id === productId,
       );
 
       if (productIndex !== -1) {
@@ -311,21 +328,21 @@ export const StoreProvider = ({ children }) => {
       const response = await fetch(`${API_URL}/product`);
       const data = await response.json();
 
-       if (!response.ok) {
-         const error = data.message;
+      if (!response.ok) {
+        const error = data.message;
 
-         if (typeof error === "string") {
-           toast.error(error);
-           setIsLoading(false);
-           return;
-         }
+        if (typeof error === "string") {
+          toast.error(error);
+          setIsLoading(false);
+          return;
+        }
 
-         error.forEach((error) => {
-           toast.error(error);
-         });
-         setIsLoading(false);
-         return;
-       }
+        error.forEach((error) => {
+          toast.error(error);
+        });
+        setIsLoading(false);
+        return;
+      }
 
       setStoreList(data);
     } catch (error) {
@@ -339,21 +356,21 @@ export const StoreProvider = ({ children }) => {
       const response = await fetch(`${API_URL}/product/featured`);
       const data = await response.json();
 
-       if (!response.ok) {
-         const error = data.message;
+      if (!response.ok) {
+        const error = data.message;
 
-         if (typeof error === "string") {
-           toast.error(error);
-           setIsLoading(false);
-           return;
-         }
+        if (typeof error === "string") {
+          toast.error(error);
+          setIsLoading(false);
+          return;
+        }
 
-         error.forEach((error) => {
-           toast.error(error);
-         });
-         setIsLoading(false);
-         return;
-       }
+        error.forEach((error) => {
+          toast.error(error);
+        });
+        setIsLoading(false);
+        return;
+      }
 
       setStoreList(data);
     } catch (error) {
@@ -368,21 +385,21 @@ export const StoreProvider = ({ children }) => {
       const response = await fetch(`${API_URL}/product/${id}`);
       const data = await response.json();
 
-       if (!response.ok) {
-         const error = data.message;
+      if (!response.ok) {
+        const error = data.message;
 
-         if (typeof error === "string") {
-           toast.error(error);
-           setIsLoading(false);
-           return;
-         }
+        if (typeof error === "string") {
+          toast.error(error);
+          setIsLoading(false);
+          return;
+        }
 
-         error.forEach((error) => {
-           toast.error(error);
-         });
-         setIsLoading(false);
-         return;
-       }
+        error.forEach((error) => {
+          toast.error(error);
+        });
+        setIsLoading(false);
+        return;
+      }
 
       setProductData(data);
       return data;
@@ -398,26 +415,26 @@ export const StoreProvider = ({ children }) => {
       const response = await fetch(`${API_URL}/category/${id}`);
       const data = await response.json();
 
-       if (!response.ok) {
-               const error = data.message;
-      
-               if (typeof error === "string") {
-                 toast.error(error);
-                 setIsLoading(false);
-                 return;
-               }
-      
-               error.forEach((error) => {
-                 toast.error(error);
-               });
-               setIsLoading(false);
-               return;
-             }
+      if (!response.ok) {
+        const error = data.message;
+
+        if (typeof error === "string") {
+          toast.error(error);
+          setIsLoading(false);
+          return;
+        }
+
+        error.forEach((error) => {
+          toast.error(error);
+        });
+        setIsLoading(false);
+        return;
+      }
 
       setStoreList(data);
     } catch (error) {
       toast.error(
-        "We are unable to get products of this category at the moment"
+        "We are unable to get products of this category at the moment",
       );
       console.log(error);
     }
@@ -427,25 +444,25 @@ export const StoreProvider = ({ children }) => {
   async function queryProduct(categoryId, maxPrice, minPrice, productName) {
     try {
       const response = await fetch(
-        `${API_URL}/product/s?categoryId=${categoryId}&maxPrice=${maxPrice}&minPrice=${minPrice}&name=${productName}&page=${currentPage}`
+        `${API_URL}/product/s?categoryId=${categoryId}&maxPrice=${maxPrice}&minPrice=${minPrice}&name=${productName}&page=${currentPage}`,
       );
       const data = await response.json();
 
-       if (!response.ok) {
-         const error = data.message;
+      if (!response.ok) {
+        const error = data.message;
 
-         if (typeof error === "string") {
-           toast.error(error);
-           setIsLoading(false);
-           return;
-         }
+        if (typeof error === "string") {
+          toast.error(error);
+          setIsLoading(false);
+          return;
+        }
 
-         error.forEach((error) => {
-           toast.error(error);
-         });
-         setIsLoading(false);
-         return;
-       }
+        error.forEach((error) => {
+          toast.error(error);
+        });
+        setIsLoading(false);
+        return;
+      }
 
       setStoreList(data.products);
       setTotalPages(data.totalPages);
@@ -502,6 +519,7 @@ export const StoreProvider = ({ children }) => {
     setIsManager,
     userEmail,
     setUserEmail,
+    logOut
   };
 
   return (

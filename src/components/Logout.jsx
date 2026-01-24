@@ -4,15 +4,16 @@ import { toast } from "react-toastify";
 import { useContext } from "react";
 
 function Logout() {
-  const { setIsAuth } = useContext(storeContext);
+  const { setIsAuth , logOut} = useContext(storeContext);
 
   const navigate = useNavigate();
 
 
 
-  function logOut() {
+  function signOut() {
     localStorage.removeItem("token");
     setIsAuth(false);
+    logOut()
     navigate("/"); //go back to home on logout
     toast.success("You are logged out");
   }
@@ -29,7 +30,7 @@ function Logout() {
 
         <div className="mt-4 flex gap-2">
           <Link
-            onClick={logOut}
+            onClick={signOut}
             to="/"
             className="rounded bg-green-50 px-4 py-2 text-sm font-medium text-green-600"
           >

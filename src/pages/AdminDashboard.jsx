@@ -1,7 +1,7 @@
 import React, { useContext, useState, useMemo } from "react";
 import { storeContext } from "../context/storeContext";
 import { Link } from "react-router-dom";
-import { FaUsersCog } from "react-icons/fa";
+import { FaCog, FaUsersCog } from "react-icons/fa";
 import { FaShop } from "react-icons/fa6";
 // --- Import Recharts components ---
 import {
@@ -330,6 +330,12 @@ function AdminDashboard() {
       description: "Manage user roles and permissions.",
       icon: <FaUsersCog className="w-8 h-8 text-indigo-600" />,
       link: "/admin/manage-roles",
+    },
+    {
+      name: "App Settings",
+      description: "Manage app settings and configuration.",
+      icon: <FaCog className="w-8 h-8 text-indigo-600" />,
+      link: "/app/setting",
     },
   ];
 
