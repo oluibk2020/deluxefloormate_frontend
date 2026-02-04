@@ -251,7 +251,7 @@ function ManageProducts() {
                 className="block text-gray-700 text-sm font-semibold mb-2"
                 htmlFor="costPrice"
               >
-               Cost Price
+                Cost Price
               </label>
               <input
                 className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out"
@@ -355,6 +355,7 @@ function ManageProducts() {
         <h2 className="text-3xl font-extrabold text-gray-800 p-6 text-center border-b border-gray-200">
           Product Catalog 📋
         </h2>
+        <h3 className="text-2xl font-bold text-gray-800 p-6 text-center">Total Products: {storeList.length}</h3>
         <div className="overflow-x-auto">
           {filteredProducts.length === 0 ? (
             <p className="text-center text-gray-600 py-8 text-lg">
@@ -382,13 +383,13 @@ function ManageProducts() {
                     scope="col"
                     className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                   Cost Price
+                    Cost Price
                   </th>
                   <th
                     scope="col"
                     className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                   Selling Price
+                    Selling Price
                   </th>
                   <th
                     scope="col"

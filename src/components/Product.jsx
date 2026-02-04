@@ -24,7 +24,7 @@ function Product() {
   const { price, imageUrl, title, description, id, quantity } = productData;
 
   //adding items to cart
-  function addToCart(e) {
+  function addToCart() {
     addNewProductToCart(productData);
     //navigate to cart
     navigate("/cart");
