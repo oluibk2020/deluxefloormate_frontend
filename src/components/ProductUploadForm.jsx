@@ -1,4 +1,4 @@
-import React, { useState, useContext, useCallback } from "react";
+import { useState, useContext, useCallback } from "react";
 import { storeContext } from "../context/storeContext";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify"; // Assuming you have react-toastify installed
@@ -83,13 +83,13 @@ function ProductUploadForm() {
         {
           method: "POST",
           body: data,
-        }
+        },
       );
 
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(
-          errorData.message || "Failed to upload image. Please try again."
+          errorData.message || "Failed to upload image. Please try again.",
         );
       }
 
@@ -99,7 +99,7 @@ function ProductUploadForm() {
         return imageData.url; // Return the URL
       } else {
         throw new Error(
-          imageData.message || "Image upload failed with an unknown error."
+          imageData.message || "Image upload failed with an unknown error.",
         );
       }
     } catch (error) {
@@ -158,13 +158,13 @@ function ProductUploadForm() {
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(
-            errorData.message || "Failed to add product. Please try again."
+            errorData.message || "Failed to add product. Please try again.",
           );
         }
 
         const productData = await response.json();
         toast.success(
-          `Product "${productData.title || title}" added successfully!`
+          `Product "${productData.title || title}" added successfully!`,
         );
         console.log("Product upload response:", productData);
 
@@ -172,7 +172,7 @@ function ProductUploadForm() {
         setFormData({
           title: "",
           description: "",
-          sellingPrice: "",
+          price: "",
           quantity: "",
           categoryId: "",
           imageFile: null,
@@ -186,7 +186,7 @@ function ProductUploadForm() {
         throw error; // Re-throw to be caught by the main submit handler
       }
     },
-    [formData, API_URL, token]
+    [formData, API_URL, token],
   );
 
   // Main submit handler for the entire form
