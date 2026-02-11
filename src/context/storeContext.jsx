@@ -20,6 +20,7 @@ export const StoreProvider = ({ children }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isManager, setIsManager] = useState(false);
   const [userEmail, setUserEmail] = useState("");
+  const [managersList, setManagersList] = useState([]);
 
   //website url
   const API_URL = import.meta.env.VITE_BACKEND_URL;
@@ -190,6 +191,42 @@ export const StoreProvider = ({ children }) => {
       const data = await response.json();
 
       setOrderData(data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function fetchManagers() {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`${API_URL}/user/managers`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        const error = data.message;
+
+        if (typeof error === "string") {
+          toast.error(error);
+          setIsLoading(false);
+          return;
+        }
+
+        error.forEach((error) => {
+          toast.error(error);
+        });
+        setIsLoading(false);
+        return;
+      }
+      setManagersList(data);
+      setIsLoading(false);
+      return
     } catch (error) {
       console.log(error);
     }
@@ -519,7 +556,9 @@ export const StoreProvider = ({ children }) => {
     setIsManager,
     userEmail,
     setUserEmail,
-    logOut
+    logOut,
+    managersList,
+    fetchManagers,
   };
 
   return (

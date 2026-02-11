@@ -1,4 +1,4 @@
-import { useContext, useState, useCallback } from "react";
+import { useContext, useState, useCallback , useEffect} from "react";
 import { storeContext } from "../context/storeContext";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -13,9 +13,15 @@ function ManageRoles() {
     token,
     isLoading,
     setIsLoading,
+    managersList,
+    fetchManagers,
   } = useContext(storeContext);
 
   const navigate = useNavigate();
+
+    useEffect(() => {
+      fetchManagers();
+    }, []);
 
  
 
@@ -84,14 +90,13 @@ function ManageRoles() {
       >
         🔙 Manage All Orders
       </Link>
-     
 
-      <form onSubmit={(e) => {
-        e.preventDefault()
-        submitHandler()
-      }}>
-        
-
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          submitHandler();
+        }}
+      >
         {/* Details Section */}
         <div className="p-6 bg-gray-50 rounded-lg border border-gray-200">
           <p className="text-xl font-semibold mb-4 text-gray-800">
@@ -137,7 +142,6 @@ function ManageRoles() {
               <option value="false">False</option>
             </select>
           </div>
-         
         </div>
 
         {/* Submit Button */}
@@ -181,8 +185,83 @@ function ManageRoles() {
             "Change User Role"
           )}
         </button>
-        {/* Consolidated messages are now handled by react-toastify */}
       </form>
+      {/* list of managed users */}
+      <div className="p-6 bg-gray-50 rounded-lg border border-gray-200">
+        <p className="text-xl font-semibold mb-4 text-gray-800">
+          <FaUserCog className="inline-block mr-2" /> List of Managed Users
+        </p>
+        <div className="flex flex-col">
+          <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+            <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+              <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
+                        Email
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
+                        Full Name
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
+                        Mobile
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
+                        Role
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {Object.keys(managersList).length === 0 ? (
+                      <p className="text-center text-gray-500 py-4">
+                        No managed users available.
+                      </p>
+                    ) : (
+                      managersList.map((manager, index) => (
+                        <tr key={index}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">
+                              {manager.email}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                              {manager.firstName + " " + manager.lastName}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                              {manager.mobile}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                              {manager.role ? "Manager" : "User"}
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
