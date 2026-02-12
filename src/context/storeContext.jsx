@@ -114,7 +114,6 @@ export const StoreProvider = ({ children }) => {
 
     try {
       const decoded = jwtDecode(localToken);
-      console.log(decoded);
       const currentTime = Date.now() / 1000; // Convert to seconds
 
       if (decoded.exp < currentTime) {
@@ -306,6 +305,13 @@ export const StoreProvider = ({ children }) => {
 
       if (!response.ok) {
         const error = data.message;
+        const errorStatus = response.status;
+
+        if (errorStatus == 401 || errorStatus == 403) {
+          toast.error(error);
+          logOut(false);
+          return;
+        }
 
         if (typeof error === "string") {
           toast.error(error);

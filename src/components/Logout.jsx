@@ -13,7 +13,7 @@ function Logout() {
   function signOut() {
     localStorage.removeItem("token");
     setIsAuth(false);
-    logOut()
+    logOut(false)
     navigate("/"); //go back to home on logout
     toast.success("You are logged out");
   }
