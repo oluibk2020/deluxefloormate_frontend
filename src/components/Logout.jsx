@@ -11,11 +11,9 @@ function Logout() {
 
 
   function signOut() {
-    localStorage.removeItem("token");
-    setIsAuth(false);
     logOut(false)
+    setIsAuth(false);
     navigate("/"); //go back to home on logout
-    toast.success("You are logged out");
   }
 
   return (

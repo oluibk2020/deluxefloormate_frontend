@@ -22,11 +22,11 @@ export const StoreProvider = ({ children }) => {
   const [isManager, setIsManager] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [managersList, setManagersList] = useState([]);
-  const [token, setToken] = useState(localStorage.getItem("token") || null);
 
   //website url
   const API_URL = import.meta.env.VITE_BACKEND_URL;
   const APP_NAME = import.meta.env.VITE_APP_NAME;
+  const token = localStorage.getItem("token");
 
   //get token from localstorage
 
@@ -92,7 +92,6 @@ export const StoreProvider = ({ children }) => {
     } finally {
       // ALWAYS clear local state regardless of server response
       localStorage.removeItem("token");
-      setToken(null); 
       setIsAuth(false);
       setIsAdmin(false);
       setIsManager(false);
@@ -105,7 +104,6 @@ export const StoreProvider = ({ children }) => {
   useEffect(() => {
     AllFeaturedProductsFetcher();
     const localToken = localStorage.getItem("token");
-    setToken(localToken); // Update token state on mount
 
     if (!localToken) {
       setIsAuth(false);
@@ -297,7 +295,7 @@ export const StoreProvider = ({ children }) => {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
 
