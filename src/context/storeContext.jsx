@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect } from "react";
 import { toast } from "react-toastify";
+import { jwtDecode } from "jwt-decode"; 
 
 export const storeContext = createContext();
 
@@ -21,59 +22,135 @@ export const StoreProvider = ({ children }) => {
   const [isManager, setIsManager] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [managersList, setManagersList] = useState([]);
+  const [token, setToken] = useState(localStorage.getItem("token") || null);
 
   //website url
   const API_URL = import.meta.env.VITE_BACKEND_URL;
   const APP_NAME = import.meta.env.VITE_APP_NAME;
 
   //get token from localstorage
-  const token = localStorage.getItem("token");
-  let decodedPayload;
 
-  function isTokenExpired(token) {
-    if (!token) return;
+  // const token = localStorage.getItem("token");
+  // let decodedPayload;
 
-    try {
-      const [, payload] = token.split(".");
-      decodedPayload = JSON.parse(atob(payload));
-      return decodedPayload.exp * 1000 < Date.now();
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  // function isTokenExpired(token) {
+  //   if (!token) return;
+
+  //   try {
+  //     const [, payload] = token.split(".");
+  //     decodedPayload = JSON.parse(atob(payload));
+  //     return decodedPayload.exp * 1000 < Date.now();
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // }
 
   //check if loggedIn
-  async function loginChecker() {
-    try {
-      //fetch token from local storage
-      const localStorageToken = token;
-      //set fullName from token
 
-      // console.log(localStorageToken);
-      const tokenExpiryStatus = isTokenExpired(localStorageToken);
-      if (tokenExpiryStatus === false) {
-        setIsAuth(true);
-        fetchOrders();
-        if (decodedPayload.isAdmin === true) {
-          setIsAdmin(true);
-        } else if (decodedPayload.isManager === true) {
-          setIsManager(true);
-        }
-      } else {
-        setIsAuth(false);
-        setIsAdmin(false);
-        localStorage.removeItem("token");
+  // async function loginChecker() {
+  //   try {
+  //     //fetch token from local storage
+  //     const localStorageToken = token;
+  //     //set fullName from token
+
+  //     // console.log(localStorageToken);
+  //     const tokenExpiryStatus = isTokenExpired(localStorageToken);
+  //     if (tokenExpiryStatus === false) {
+  //       setIsAuth(true);
+  //       fetchOrders();
+  //       if (decodedPayload.isAdmin === true) {
+  //         setIsAdmin(true);
+  //       } else if (decodedPayload.isManager === true) {
+  //         setIsManager(true);
+  //       }
+  //     } else {
+  //       setIsAuth(false);
+  //       setIsAdmin(false);
+  //       localStorage.removeItem("token");
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // }
+
+  // 2. Centralized Logout Function
+  // We define this early so we can use it in the useEffect
+  const logOut = async (serverLogout = true) => {
+    try {
+      // Optional: Notify backend
+      if (serverLogout) {
+        await fetch(`${API_URL}/auth/logout`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
       }
     } catch (error) {
-      console.log(error);
+      console.log("Logout error", error);
+    } finally {
+      // ALWAYS clear local state regardless of server response
+      localStorage.removeItem("token");
+      setToken(null); 
+      setIsAuth(false);
+      setIsAdmin(false);
+      setIsManager(false);
+      setFullName("User");
+      toast.info("You have been logged out.");
     }
-  }
+  };
 
-  //fetch all products on app load
+  // 3. The "Auto-Logout" Logic
   useEffect(() => {
     AllFeaturedProductsFetcher();
-    loginChecker(); //check if user has loggedIn device
-  }, []);
+    const localToken = localStorage.getItem("token");
+    setToken(localToken); // Update token state on mount
+
+    if (!localToken) {
+      setIsAuth(false);
+      return;
+    }
+
+    try {
+      const decoded = jwtDecode(localToken);
+      console.log(decoded);
+      const currentTime = Date.now() / 1000; // Convert to seconds
+
+      if (decoded.exp < currentTime) {
+        // Token is ALREADY expired
+        logOut(false);
+      } else {
+        // Token is Valid
+        setIsAuth(true);
+
+        // Handle Roles
+        if (decoded.isAdmin) setIsAdmin(true);
+        if (decoded.isManager) setIsManager(true);
+        // If your token has a name, set it here: setFullName(decoded.name);
+
+        // Fetch Initial Data
+        fetchOrders();
+
+        // CALCULATE TIME LEFT and SET TIMER
+        const timeUntilExpiry = (decoded.exp - currentTime) * 1000; // Convert back to ms
+
+        console.log(
+          `Auto-logout scheduled in ${timeUntilExpiry / 1000} seconds`,
+        );
+
+        const timer = setTimeout(() => {
+          logOut(false); // Logout client-side when time is up
+        }, timeUntilExpiry);
+
+        // Cleanup: Clear timer if user closes app or logs out manually
+        return () => clearTimeout(timer);
+      }
+    } catch (error) {
+      console.log("Invalid Token:", error);
+      logOut(false);
+    }
+  }, []); // Runs once on mount
 
   async function createGatewayInvoice(orderId) {
     const response = await fetch(
@@ -137,25 +214,6 @@ export const StoreProvider = ({ children }) => {
       });
       setLocalTime(convertedTime);
       return;
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  //LOGOUT
-  async function logOut() {
-    try {
-      const response = await fetch(`${API_URL}/auth/logout`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        toast.success("Logged out from server");
-      }
     } catch (error) {
       console.log(error);
     }
@@ -226,7 +284,7 @@ export const StoreProvider = ({ children }) => {
       }
       setManagersList(data);
       setIsLoading(false);
-      return
+      return;
     } catch (error) {
       console.log(error);
     }
@@ -564,4 +622,4 @@ export const StoreProvider = ({ children }) => {
   return (
     <storeContext.Provider value={contextObj}>{children}</storeContext.Provider>
   );
-};
+};;
