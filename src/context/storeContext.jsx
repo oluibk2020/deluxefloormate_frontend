@@ -543,7 +543,7 @@ export const StoreProvider = ({ children }) => {
   async function queryProduct(categoryId, maxPrice, minPrice, productName) {
     try {
       const response = await fetch(
-        `${API_URL}/product/s?categoryId=${categoryId}&maxPrice=${maxPrice}&minPrice=${minPrice}&name=${productName}&page=${currentPage}`,
+        `${API_URL}/product/s?limit=12&page=${currentPage}&categoryId=${categoryId}&maxPrice=${maxPrice}&minPrice=${minPrice}&name=${productName}`
       );
       const data = await response.json();
 
