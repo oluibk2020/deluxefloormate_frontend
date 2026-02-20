@@ -411,6 +411,7 @@ function ProductUploadForm() {
               onChange={handleInputChange} // Use the consolidated handler
               required
             >
+              <option value="">Choose a category</option>
               {categoryList.length > 0 &&
                 categoryList.map((item) => {
                   return (

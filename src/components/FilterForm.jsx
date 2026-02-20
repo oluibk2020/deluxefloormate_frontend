@@ -185,14 +185,15 @@ function FilterForm() {
                     onClick={filterCategory}
                     className="h-10 rounded border-gray-300 text-sm w-full border"
                   >
-
-                  {categoryList.length > 0 && categoryList.map((item) => {
-                    return (
-                      <option key={item.id} value={item.id}>
-                        {item.title}
-                      </option>
-                    );
-                  })}
+                    <option value="">Choose a category</option>
+                    {categoryList.length > 0 &&
+                      categoryList.map((item) => {
+                        return (
+                          <option key={item.id} value={item.id}>
+                            {item.title}
+                          </option>
+                        );
+                      })}
                   </select>
 
                   <button

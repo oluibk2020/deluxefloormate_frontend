@@ -322,6 +322,7 @@ function ManageProducts() {
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
               >
+                <option value="">Choose a category</option>
                 {categoryList.length > 0 &&
                   categoryList.map((item) => {
                     return (
