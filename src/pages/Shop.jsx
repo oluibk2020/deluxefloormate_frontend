@@ -4,17 +4,13 @@ import {storeContext} from "../context/storeContext";
 import FilterForm from "../components/FilterForm";
 
 function Shop() {
-  const {
-    storeList,
-    currentPage,
-    totalPages,
-    handlePageChange,
-    AllProductFetcher,
-  } = useContext(storeContext);
+  const { storeList, currentPage, totalPages, handlePageChange, queryProduct } =
+    useContext(storeContext);
 
   useEffect(() => {
-   AllProductFetcher() 
-  },[])
+    console.log(currentPage);
+   queryProduct(); 
+  },[currentPage])
   
 
   return (
@@ -27,7 +23,8 @@ function Shop() {
 
           <p className="mt-4 max-w-md  text-gray-500">
             Would you want to get high quality rugs, throw pillows and other
-            interior accessories. Check out our store here and get amazing prices.
+            interior accessories. Check out our store here and get amazing
+            prices.
           </p>
         </header>
 
@@ -56,7 +53,7 @@ function Shop() {
                   <div className="relative bg-white pt-3">
                     <h3 className="text-base text-gray-700 group-hover:underline group-hover:underline-offset-4">
                       {item.title.replace(/\b\w/g, (match) =>
-                        match.toUpperCase()
+                        match.toUpperCase(),
                       )}
                     </h3>
 
@@ -80,7 +77,11 @@ function Shop() {
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className="inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100"
+              className={
+                currentPage === 1
+                  ? "cursor-not-allowed inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100 bg-gray-200 text-gray-400"
+                  : "inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100"
+              }
             >
               <span className="sr-only">Prev Page</span>
               <svg
@@ -99,9 +100,7 @@ function Shop() {
           </li>
 
           <li>
-            <div
-              className="block h-8 w-8 rounded border border-gray-100 bg-white text-center leading-8 text-gray-900"
-            >
+            <div className="block h-8 w-8 rounded border border-gray-100 bg-white text-center leading-8 text-gray-900">
               {currentPage}
             </div>
           </li>
@@ -110,7 +109,11 @@ function Shop() {
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className="inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100"
+              className={
+                currentPage === totalPages
+                  ? "cursor-not-allowed inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100 bg-gray-200 text-gray-400"
+                  : "inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100"
+              }
             >
               <span className="sr-only">Next Page</span>
               <svg

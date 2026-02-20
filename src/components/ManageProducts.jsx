@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import Spinner from "./Spinner";
 import { toast } from "react-toastify";
 import { GiQuakeStomp } from "react-icons/gi"; // This icon is not used in the original component, but kept if you plan to use it.
-
+import FilterForm from "./FilterForm";
 function ManageProducts() {
   const [title, setTitle] = useState("");
   const [cost, setCost] = useState("");
@@ -15,14 +15,19 @@ function ManageProducts() {
   const [editMode, setEditMode] = useState(false);
   const [productId, setProductId] = useState(null);
   const [searchQuery, setSearchQuery] = useState(""); // New state for search query
+  const [advancedSearchMode, setAdvancedSearchMode] = useState(true)
 
   const {
     API_URL,
     storeList, // This is your array of all products
     token,
-    AllProductFetcher, // This function should ideally fetch ALL products without a query for initial load
+    queryProduct, // This function should ideally fetch ALL products without a query for initial load
     isLoading,
     setIsLoading,
+    totalProducts,
+    currentPage,
+    totalPages,
+    handlePageChange,
   } = useContext(storeContext);
 
   // Memoize filtered products to prevent unnecessary re-renders of the list
@@ -42,9 +47,8 @@ function ManageProducts() {
 
   // Fetch all products on component mount (if not already fetched)
   useEffect(() => {
-
-    AllProductFetcher();
-  }, []); // Depend on AllProductFetcher and storeList
+    queryProduct();
+  }, [currentPage]); // Depend on AllProductFetcher and storeList
 
   const updateProductHandler = useCallback(async () => {
     setIsLoading(true);
@@ -82,7 +86,7 @@ function ManageProducts() {
        }
 
       toast.success("Product updated successfully");
-      await AllProductFetcher(); // Refresh the product list after update
+      await queryProduct(); // Refresh the product list after update
       clearForm();
       setEditMode(false);
     } catch (error) {
@@ -100,7 +104,7 @@ function ManageProducts() {
     categoryId,
     quantity,
     token,
-    AllProductFetcher,
+    queryProduct,
     setIsLoading,
   ]);
 
@@ -146,7 +150,7 @@ function ManageProducts() {
          }
 
         toast.success("Product deleted successfully");
-        await AllProductFetcher(); // Refresh the product list after deletion
+        await queryProduct(); // Refresh the product list after deletion
       } catch (error) {
         console.error("Error deleting product:", error);
         toast.error("An error occurred while deleting the product.");
@@ -154,7 +158,7 @@ function ManageProducts() {
         setIsLoading(false);
       }
     },
-    [API_URL, token, AllProductFetcher, setIsLoading]
+    [API_URL, token, queryProduct, setIsLoading]
   );
 
   if (isLoading) {
@@ -198,6 +202,7 @@ function ManageProducts() {
           ➕ Upload New Product
         </Link>
       </div>
+      {advancedSearchMode && <FilterForm />}
 
       {editMode && (
         <div className="bg-white shadow-xl rounded-lg p-6 mb-8 w-full lg:w-3/4 xl:w-1/2 mx-auto">
@@ -355,7 +360,14 @@ function ManageProducts() {
         <h2 className="text-3xl font-extrabold text-gray-800 p-6 text-center border-b border-gray-200">
           Product Catalog 📋
         </h2>
-        <h3 className="text-2xl font-bold text-gray-800 p-6 text-center">Total Products: {storeList.length}</h3>
+        <h3 className="text-2xl font-bold text-gray-800 p-6 text-center">
+          Total Products: {totalProducts}
+        </h3>
+        <div className="mt-8">
+          <p className="text-sm text-gray-500">
+            Showing <span> {currentPage} </span> of {totalPages} pages
+          </p>
+        </div>
         <div className="overflow-x-auto">
           {filteredProducts.length === 0 ? (
             <p className="text-center text-gray-600 py-8 text-lg">
@@ -464,6 +476,65 @@ function ManageProducts() {
             </table>
           )}
         </div>
+        <ol className="mt-8 flex justify-center gap-1 text-xs font-medium">
+          <li>
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className={
+                currentPage === 1
+                  ? "cursor-not-allowed inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100 bg-gray-200 text-gray-400"
+                  : "inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100"
+              }
+            >
+              <span className="sr-only">Prev Page</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-3 w-3"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+          </li>
+
+          <li>
+            <div className="block h-8 w-8 rounded border border-gray-100 bg-white text-center leading-8 text-gray-900">
+              {currentPage}
+            </div>
+          </li>
+
+          <li>
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className={
+                currentPage === totalPages
+                  ? "cursor-not-allowed inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100 bg-gray-200 text-gray-400"
+                  : "inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100"
+              }
+            >
+              <span className="sr-only">Next Page</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-3 w-3"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+          </li>
+        </ol>
       </div>
     </div>
   );

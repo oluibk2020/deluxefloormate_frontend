@@ -18,7 +18,8 @@ function ManageOrders() {
   const [otp, setOtp] = useState("");
   const [editMode, setEditMode] = useState(false);
   const [orderId, setOrderId] = useState(null);
-  const [soretdOrders, setSortedOrders] = useState([]);
+  const [orderLimit, setOrderLimit] = useState(10); // Number of orders to fetch per page
+  const [sortedOrders, setSortedOrders] = useState([]);
   const {
     API_URL,
     token,
@@ -28,10 +29,16 @@ function ManageOrders() {
     fetchOrders,
     isAdmin,
     isManager,
+    totalOrders,
+    currentPage,
+    totalPages,
+    handlePageChange,
   } = useContext(storeContext);
 
   async function fetchOrdersHandler() {
-    const data = await fetchOrders();
+    const data = await fetchOrders(
+      orderLimit, // Pass the order limit for pagination
+    ); //fetch 10 orders for pagination
 
     //sort lessons
     const sortedOrders = _.orderBy(data.orders, ["createdAt"], ["desc"]);
@@ -42,7 +49,7 @@ function ManageOrders() {
   }
   useEffect(() => {
     fetchOrdersHandler();
-  }, []);
+  }, [currentPage]);
 
   console.log(orderList);
 
@@ -169,7 +176,7 @@ function ManageOrders() {
       }
 
       toast.success("Order deleted successfully");
-      fetchOrders();
+      fetchOrders(orderLimit);
       setIsLoading(false);
     } catch (error) {
       console.log(error);
@@ -382,8 +389,16 @@ function ManageOrders() {
         <h2 className="text-3xl font-extrabold text-gray-800 p-6 text-center border-b border-gray-200">
           Manage Client Orders 📋
         </h2>
+        <h3 className="text-2xl font-bold text-gray-800 p-6 text-center">
+          Total Products: {totalOrders}
+        </h3>
+        <div className="mt-8">
+          <p className="text-sm text-gray-500">
+            Showing <span> {currentPage} </span> of {totalPages} pages
+          </p>
+        </div>
         <div className="overflow-x-auto">
-          {Object.keys(soretdOrders).length === 0 ? (
+          {Object.keys(sortedOrders).length === 0 ? (
             <p className="text-center text-gray-600 py-8 text-lg">
               No orders available to manage.
             </p>
@@ -424,7 +439,7 @@ function ManageOrders() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {soretdOrders.map((order) => (
+                {sortedOrders.map((order) => (
                   <tr key={order.id} className="hover:bg-gray-50">
                     <td className="py-4 px-6 text-sm font-medium text-gray-900">
                       {order.id}
@@ -459,7 +474,7 @@ function ManageOrders() {
 
                               //set the form values
                               const totalAmount = Number(
-                                order.totalAmount
+                                order.totalAmount,
                               ).toLocaleString();
 
                               setOrderId(order.id);
@@ -469,10 +484,10 @@ function ManageOrders() {
                               setDiscountAmount(order.discountAmount);
                               setDiscountAmountFromServer(order.discountAmount);
                               setDiscountPaymentStatusFromServer(
-                                order.discountPaymentStatus
+                                order.discountPaymentStatus,
                               );
                               setDiscountPaymentStatus(
-                                order.discountPaymentStatus
+                                order.discountPaymentStatus,
                               );
                               //navigate to the update form
                               document
@@ -505,6 +520,57 @@ function ManageOrders() {
             </table>
           )}
         </div>
+        <ol className="mt-8 flex justify-center gap-1 text-xs font-medium">
+          <li>
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className={currentPage === 1 ? "cursor-not-allowed inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100 bg-gray-200 text-gray-400" : "inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100"}
+            >
+              <span className="sr-only">Prev Page</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-3 w-3"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+          </li>
+
+          <li>
+            <div className="block h-8 w-8 rounded border border-gray-100 bg-white text-center leading-8 text-gray-900">
+              {currentPage}
+            </div>
+          </li>
+
+          <li>
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className={currentPage === totalPages ? "cursor-not-allowed inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100 bg-gray-200 text-gray-400" : "inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100"}
+            >
+              <span className="sr-only">Next Page</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-3 w-3"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+          </li>
+        </ol>
       </div>
     </div>
   );

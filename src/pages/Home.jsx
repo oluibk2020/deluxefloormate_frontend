@@ -3,19 +3,14 @@ import { useContext, useEffect } from "react";
 import {storeContext} from "../context/storeContext";
 
 function Home() {
-  const { storeList, AllProductFetcher, categoryProductFetcher } =
+  const { storeList, queryProduct } =
     useContext(storeContext);
 
    useEffect(() => {
-     AllProductFetcher();
+     queryProduct("", "", "", "", "true");
    }, []);
 
-   function rugCategoryHandler() {
-    categoryProductFetcher(1)
-   }
-   function pillowCategoryHandler() {
-    categoryProductFetcher(2)
-   }
+
   return (
     <>
       <section>
@@ -47,7 +42,6 @@ function Home() {
                 <li>
                   <Link
                     to="/shop"
-                    onClick={rugCategoryHandler}
                     className="group block"
                   >
                     <img
@@ -69,7 +63,6 @@ function Home() {
                 <li>
                   <Link
                     to="/shop"
-                    onClick={pillowCategoryHandler}
                     className="group block"
                   >
                     <img

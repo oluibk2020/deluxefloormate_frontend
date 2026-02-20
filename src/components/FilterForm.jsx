@@ -1,10 +1,12 @@
-
-import { useContext, useState,useEffect } from "react";
-import {storeContext} from "../context/storeContext";
+import { useContext, useState, useEffect } from "react";
+import { storeContext } from "../context/storeContext";
 
 function FilterForm() {
-  const { AllProductFetcher, categoryProductFetcher,currentPage, queryProduct, setTotalPages } =
-    useContext(storeContext);
+  const {
+    currentPage,
+    queryProduct,
+    setTotalPages,
+  } = useContext(storeContext);
 
   //form data
   const [formData, setFormData] = useState({
@@ -27,9 +29,9 @@ function FilterForm() {
   }
 
   //set category in filter for searching in shop
-  function selectCategory(e) {
-    categoryProductFetcher(e.target.value);
-  }
+  // function selectCategory(e) {
+  //   queryProduct(e.target.value, "", "", "", "");
+  // }
 
   function filterCategory(e) {
     setCategoryId(e.target.value);
@@ -46,11 +48,20 @@ function FilterForm() {
 
   //query products on current page change. this loads the next page
   useEffect(() => {
-    if (filterPriceTo.trim().length === 0 || filterPriceFrom.trim().length === 0 || categoryId.trim().length === 0 || filterProductName.trim().length === 0) {
-      return
+    if (
+      filterPriceTo.trim().length === 0 ||
+      filterPriceFrom.trim().length === 0 ||
+      categoryId.trim().length === 0 ||
+      filterProductName.trim().length === 0
+    ) {
+      return;
     } else {
-
-      queryProduct(categoryId, filterPriceTo, filterPriceFrom, filterProductName);
+      queryProduct(
+        categoryId,
+        filterPriceTo,
+        filterPriceFrom,
+        filterProductName,
+      );
     }
   }, [currentPage]);
 
@@ -61,8 +72,8 @@ function FilterForm() {
       filterPriceTo: "",
       filterProductName: "",
     });
-    setTotalPages(1)
-    AllProductFetcher()
+    setTotalPages(1);
+    queryProduct();
   }
 
   return (
@@ -70,7 +81,7 @@ function FilterForm() {
       <div className="relative">
         <details className="group [&_summary::-webkit-details-marker]:hidden">
           <summary className="flex cursor-pointer items-center gap-2 border-b border-gray-400 pb-1 text-gray-900 transition hover:border-gray-600">
-            <span className="text-sm font-medium"> Filter </span>
+            <span className="text-sm font-medium"> Filter Products </span>
 
             <span className="transition group-open:-rotate-180">
               <svg
@@ -195,7 +206,7 @@ function FilterForm() {
           </div>
         </details>
       </div>
-      <div className="sm:block">
+      {/* <div className="sm:block">
         <label htmlFor="SortBy" className="sr-only">
           SortBy
         </label>
@@ -205,7 +216,7 @@ function FilterForm() {
           onClick={selectCategory}
           className="h-10 rounded border-gray-300 text-sm"
         >
-          <option value="2000">All</option>
+          <option value="">Choose a category</option>
           <option value="1">7ft * 10ft Rugs</option>
           <option value="2">Throw pillows</option>
           <option value="3">5ft * 7ft Rugs</option>
@@ -221,7 +232,7 @@ function FilterForm() {
           <option value="13">Wall to wall rug</option>
           <option value="14">8ft * 11ft Rugs</option>
         </select>
-      </div>
+      </div> */}
     </div>
   );
 }

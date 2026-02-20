@@ -1,6 +1,6 @@
 import { createContext, useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import { jwtDecode } from "jwt-decode"; 
+import { jwtDecode } from "jwt-decode";
 
 export const storeContext = createContext();
 
@@ -22,6 +22,8 @@ export const StoreProvider = ({ children }) => {
   const [isManager, setIsManager] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [managersList, setManagersList] = useState([]);
+  const [totalProducts, setTotalProducts] = useState(0)
+  const [totalOrders, setTotalOrders] = useState(0)
 
   //website url
   const API_URL = import.meta.env.VITE_BACKEND_URL;
@@ -102,7 +104,6 @@ export const StoreProvider = ({ children }) => {
 
   // 3. The "Auto-Logout" Logic
   useEffect(() => {
-    AllFeaturedProductsFetcher();
     const localToken = localStorage.getItem("token");
 
     if (!localToken) {
@@ -126,8 +127,6 @@ export const StoreProvider = ({ children }) => {
         if (decoded.isManager) setIsManager(true);
         // If your token has a name, set it here: setFullName(decoded.name);
 
-        // Fetch Initial Data
-        fetchOrders();
 
         // CALCULATE TIME LEFT and SET TIMER
         const timeUntilExpiry = (decoded.exp - currentTime) * 1000; // Convert back to ms
@@ -288,16 +287,32 @@ export const StoreProvider = ({ children }) => {
   }
 
   //fetch all orders from server
-  async function fetchOrders() {
+  async function fetchOrders(limit = 0) {
     try {
       setIsLoading(true);
-      const response = await fetch(`${API_URL}/order`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      let response;
+      if (limit === 0) {
+        // Fetch all orders if limit is 0
+        response = await fetch(
+          `${API_URL}/order`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          },
+        );
+      } else{
+        // Fetch orders with pagination
+        response = await fetch(`${API_URL}/order?limit=${limit}&page=${currentPage}`, {
+         method: "GET",
+         headers: {
+           "Content-Type": "application/json",
+           Authorization: `Bearer ${localStorage.getItem("token")}`,
+         },
+       });
+      }
 
       const data = await response.json();
 
@@ -327,6 +342,8 @@ export const StoreProvider = ({ children }) => {
       // console.log(data);
       setFullName(data.firstName);
       setOrderList(data);
+      setTotalPages(data.meta.totalPages)
+      setTotalOrders(data.meta.totalOrders)
       setIsLoading(false);
       return data;
     } catch (error) {
@@ -422,61 +439,61 @@ export const StoreProvider = ({ children }) => {
   }
 
   //fetch all products
-  async function AllProductFetcher() {
-    try {
-      const response = await fetch(`${API_URL}/product`);
-      const data = await response.json();
+  // async function AllProductFetcher() {
+  //   try {
+  //     const response = await fetch(`${API_URL}/product`);
+  //     const data = await response.json();
 
-      if (!response.ok) {
-        const error = data.message;
+  //     if (!response.ok) {
+  //       const error = data.message;
 
-        if (typeof error === "string") {
-          toast.error(error);
-          setIsLoading(false);
-          return;
-        }
+  //       if (typeof error === "string") {
+  //         toast.error(error);
+  //         setIsLoading(false);
+  //         return;
+  //       }
 
-        error.forEach((error) => {
-          toast.error(error);
-        });
-        setIsLoading(false);
-        return;
-      }
+  //       error.forEach((error) => {
+  //         toast.error(error);
+  //       });
+  //       setIsLoading(false);
+  //       return;
+  //     }
 
-      setStoreList(data);
-    } catch (error) {
-      toast.error("We are unable to get all products at the moment");
-      console.log(error);
-    }
-  }
-  //fetch all products
-  async function AllFeaturedProductsFetcher() {
-    try {
-      const response = await fetch(`${API_URL}/product/featured`);
-      const data = await response.json();
+  //     setStoreList(data);
+  //   } catch (error) {
+  //     toast.error("We are unable to get all products at the moment");
+  //     console.log(error);
+  //   }
+  // }
+  // //fetch all products
+  // async function AllFeaturedProductsFetcher() {
+  //   try {
+  //     const response = await fetch(`${API_URL}/product/featured`);
+  //     const data = await response.json();
 
-      if (!response.ok) {
-        const error = data.message;
+  //     if (!response.ok) {
+  //       const error = data.message;
 
-        if (typeof error === "string") {
-          toast.error(error);
-          setIsLoading(false);
-          return;
-        }
+  //       if (typeof error === "string") {
+  //         toast.error(error);
+  //         setIsLoading(false);
+  //         return;
+  //       }
 
-        error.forEach((error) => {
-          toast.error(error);
-        });
-        setIsLoading(false);
-        return;
-      }
+  //       error.forEach((error) => {
+  //         toast.error(error);
+  //       });
+  //       setIsLoading(false);
+  //       return;
+  //     }
 
-      setStoreList(data);
-    } catch (error) {
-      console.log(error);
-      toast.error("We are unable to get all products at the moment");
-    }
-  }
+  //     setStoreList(data);
+  //   } catch (error) {
+  //     console.log(error);
+  //     toast.error("We are unable to get all products at the moment");
+  //   }
+  // }
 
   //fetch single product
   async function productFetcher(id) {
@@ -509,43 +526,67 @@ export const StoreProvider = ({ children }) => {
   }
 
   //fetch products of a category
-  async function categoryProductFetcher(id) {
-    try {
-      const response = await fetch(`${API_URL}/category/${id}`);
-      const data = await response.json();
+  // async function categoryProductFetcher(id) {
+  //   try {
+  //     const response = await fetch(
+  //       `${API_URL}/product/s?limit=20&page=${currentPage}${id ? `&categoryId=${id}` : ""}`,
+  //     );
+  //     const data = await response.json();
 
-      if (!response.ok) {
-        const error = data.message;
+  //     if (!response.ok) {
+  //       const error = data.message;
 
-        if (typeof error === "string") {
-          toast.error(error);
-          setIsLoading(false);
-          return;
-        }
+  //       if (typeof error === "string") {
+  //         toast.error(error);
+  //         setIsLoading(false);
+  //         return;
+  //       }
 
-        error.forEach((error) => {
-          toast.error(error);
-        });
-        setIsLoading(false);
-        return;
-      }
+  //       error.forEach((error) => {
+  //         toast.error(error);
+  //       });
+  //       setIsLoading(false);
+  //       return;
+  //     }
 
-      setStoreList(data);
-    } catch (error) {
-      toast.error(
-        "We are unable to get products of this category at the moment",
-      );
-      console.log(error);
-    }
-  }
+  //     setStoreList(data.products);
+  //     setTotalPages(data.meta.totalPages);
+  //   } catch (error) {
+  //     toast.error(
+  //       "We are unable to get products of this category at the moment",
+  //     );
+  //     console.log(error);
+  //   }
+  // }
 
   //query products wih search
-  async function queryProduct(categoryId, maxPrice, minPrice, productName) {
+  async function queryProduct(
+    categoryId = "",
+    maxPrice = "",
+    minPrice = "",
+    productName = "",
+    isFeatured = ""
+  ) {
     try {
-      const response = await fetch(
-        `${API_URL}/product/s?limit=12&page=${currentPage}&categoryId=${categoryId}&maxPrice=${maxPrice}&minPrice=${minPrice}&name=${productName}`
-      );
-      const data = await response.json();
+      let response;
+      if (
+        categoryId.trim().length === 0 ||
+        maxPrice.trim().length === 0 ||
+        minPrice.trim().length === 0 ||
+        productName.trim().length === 0
+      ) {
+        isFeatured.trim().length !== 0 ? response = await fetch(
+          `${API_URL}/product/s?limit=20&page=${currentPage}&isFeatured=${isFeatured}`) : response = await fetch(
+            `${API_URL}/product/s?limit=20&page=${currentPage}`);
+          } else {
+            console.log("running all");
+            response = await fetch(
+              `${API_URL}/product/s?limit=20&page=${currentPage}&categoryId=${categoryId}&maxPrice=${maxPrice}&minPrice=${minPrice}&name=${productName}`,
+            );
+          }
+          
+          const data = await response.json();
+          console.log(isFeatured, "this is featured", data, "categoryId", categoryId);
 
       if (!response.ok) {
         const error = data.message;
@@ -564,7 +605,8 @@ export const StoreProvider = ({ children }) => {
       }
 
       setStoreList(data.products);
-      setTotalPages(data.totalPages);
+      setTotalPages(data.meta.totalPages);
+      setTotalProducts(data.meta.totalProducts)
     } catch (error) {
       console.error("Error fetching products:", error);
     }
@@ -584,8 +626,6 @@ export const StoreProvider = ({ children }) => {
     setStoreList,
     productData,
     productFetcher,
-    categoryProductFetcher,
-    AllProductFetcher,
     queryProduct,
     cartData,
     setCartData,
@@ -621,9 +661,11 @@ export const StoreProvider = ({ children }) => {
     logOut,
     managersList,
     fetchManagers,
+    totalProducts,
+    totalOrders
   };
 
   return (
     <storeContext.Provider value={contextObj}>{children}</storeContext.Provider>
   );
-};;
+};

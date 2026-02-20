@@ -13,7 +13,7 @@ function Orders() {
   } = useContext(storeContext);
 
   useEffect(() => {
-    fetchOrders();
+    fetchOrders(0);
   }, []);
 
   if (isLoading) {

@@ -1,4 +1,4 @@
-import React, { useContext, useState, useMemo } from "react";
+import React, { useContext, useEffect, useMemo } from "react";
 import { storeContext } from "../context/storeContext";
 import { Link } from "react-router-dom";
 import { FaCog, FaUsersCog } from "react-icons/fa";
@@ -19,8 +19,12 @@ import {
 } from "recharts";
 
 function AdminDashboard() {
-  const { fullName, APP_NAME, orderList, isManager, isAdmin } =
+  const { fullName, APP_NAME, orderList, isManager, isAdmin, fetchOrders } =
     useContext(storeContext);
+
+    useEffect(() => {
+      fetchOrders(0); //fetch all orders for analytics. pass 0 to fetch all orders without pagination
+    },[])
 
   // --- Helper: Check if a date is today ---
   const isToday = (dateString) => {
