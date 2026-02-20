@@ -524,8 +524,12 @@ function ManageOrders() {
           <li>
             <button
               onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className={currentPage === 1 ? "cursor-not-allowed inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100 bg-gray-200 text-gray-400" : "inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100"}
+              disabled={currentPage === 1 || totalPages === 0}
+              className={
+                currentPage === 1 || totalPages === 0
+                  ? "cursor-not-allowed inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100 bg-gray-200 text-gray-400"
+                  : "inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100"
+              }
             >
               <span className="sr-only">Prev Page</span>
               <svg
@@ -552,8 +556,12 @@ function ManageOrders() {
           <li>
             <button
               onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className={currentPage === totalPages ? "cursor-not-allowed inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100 bg-gray-200 text-gray-400" : "inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100"}
+              disabled={currentPage === totalPages || totalPages === 0}
+              className={
+                currentPage === totalPages || totalPages === 0
+                  ? "cursor-not-allowed inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100 bg-gray-200 text-gray-400"
+                  : "inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100"
+              }
             >
               <span className="sr-only">Next Page</span>
               <svg

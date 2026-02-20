@@ -15,7 +15,7 @@ function ManageProducts() {
   const [editMode, setEditMode] = useState(false);
   const [productId, setProductId] = useState(null);
   const [searchQuery, setSearchQuery] = useState(""); // New state for search query
-  const [advancedSearchMode, setAdvancedSearchMode] = useState(true)
+  const [advancedSearchMode, setAdvancedSearchMode] = useState(true);
 
   const {
     API_URL,
@@ -28,6 +28,7 @@ function ManageProducts() {
     currentPage,
     totalPages,
     handlePageChange,
+    categoryList,
   } = useContext(storeContext);
 
   // Memoize filtered products to prevent unnecessary re-renders of the list
@@ -41,9 +42,14 @@ function ManageProducts() {
 
     // Filter products based on title (case-insensitive)
     return storeList.filter((product) =>
-      product.title.toLowerCase().includes(searchQuery.toLowerCase())
+      product.title.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   }, [storeList, searchQuery]);
+
+  //fetch catgegory list from server on app load
+  useEffect(() => {
+    console.log(categoryList);
+  }, [categoryList]);
 
   // Fetch all products on component mount (if not already fetched)
   useEffect(() => {
@@ -68,22 +74,22 @@ function ManageProducts() {
         }),
       });
 
-       const data = await response.json();
-       if (!response.ok) {
-         const error = data.message;
+      const data = await response.json();
+      if (!response.ok) {
+        const error = data.message;
 
-         if (typeof error === "string") {
-           toast.error(error);
-           setIsLoading(false);
-           return;
-         }
+        if (typeof error === "string") {
+          toast.error(error);
+          setIsLoading(false);
+          return;
+        }
 
-         error.forEach((error) => {
-           toast.error(error);
-         });
-         setIsLoading(false);
-         return;
-       }
+        error.forEach((error) => {
+          toast.error(error);
+        });
+        setIsLoading(false);
+        return;
+      }
 
       toast.success("Product updated successfully");
       await queryProduct(); // Refresh the product list after update
@@ -132,22 +138,22 @@ function ManageProducts() {
           },
         });
 
-         const data = await response.json();
-         if (!response.ok) {
-           const error = data.message;
+        const data = await response.json();
+        if (!response.ok) {
+          const error = data.message;
 
-           if (typeof error === "string") {
-             toast.error(error);
-             setIsLoading(false);
-             return;
-           }
+          if (typeof error === "string") {
+            toast.error(error);
+            setIsLoading(false);
+            return;
+          }
 
-           error.forEach((error) => {
-             toast.error(error);
-           });
-           setIsLoading(false);
-           return;
-         }
+          error.forEach((error) => {
+            toast.error(error);
+          });
+          setIsLoading(false);
+          return;
+        }
 
         toast.success("Product deleted successfully");
         await queryProduct(); // Refresh the product list after deletion
@@ -158,7 +164,7 @@ function ManageProducts() {
         setIsLoading(false);
       }
     },
-    [API_URL, token, queryProduct, setIsLoading]
+    [API_URL, token, queryProduct, setIsLoading],
   );
 
   if (isLoading) {
@@ -316,21 +322,14 @@ function ManageProducts() {
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
               >
-                <option value="">Select category</option>
-                <option value="1">7ft * 10ft Rugs</option>
-                <option value="2">Throw pillows</option>
-                <option value="3">5ft * 7ft Rugs</option>
-                <option value="4">3ft * 5ft Rugs</option>
-                <option value="5">10ft * 13ft Rugs</option>
-                <option value="6">Footmat</option>
-                <option value="7">Skirtings</option>
-                <option value="8">European Armstrong carpet</option>
-                <option value="9">Diffuser</option>
-                <option value="10">PVC vinyl tiles</option>
-                <option value="11">Vinyl plank</option>
-                <option value="12">Laminate floor</option>
-                <option value="13">Wall to wall rug</option>
-                <option value="14">8ft * 11ft Rugs</option>
+                {categoryList.length > 0 &&
+                  categoryList.map((item) => {
+                    return (
+                      <option key={item.id} value={item.id}>
+                        {item.title}
+                      </option>
+                    );
+                  })}
               </select>
             </div>
 

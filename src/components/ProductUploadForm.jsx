@@ -1,10 +1,10 @@
-import { useState, useContext, useCallback } from "react";
+import { useState, useContext, useCallback, useEffect } from "react";
 import { storeContext } from "../context/storeContext";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify"; // Assuming you have react-toastify installed
 
 function ProductUploadForm() {
-  const { API_URL, token } = useContext(storeContext); // Removed isAdmin as it's not used here
+  const { API_URL, token, categoryList } = useContext(storeContext); // Removed isAdmin as it's not used here
 
   // Consolidated form data into a single state object for better management
   const [formData, setFormData] = useState({
@@ -19,6 +19,11 @@ function ProductUploadForm() {
     featured: false,
     costPrice: "",
   });
+
+  //fetch catgegory list from server on app load
+    useEffect(() => {
+      console.log(categoryList);
+    }, [categoryList]);
 
   const [isLoading, setIsLoading] = useState(false);
   const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
@@ -406,21 +411,14 @@ function ProductUploadForm() {
               onChange={handleInputChange} // Use the consolidated handler
               required
             >
-              <option value="">Select category</option>
-              <option value="1">7ft * 10ft Rugs</option>
-              <option value="2">Throw pillows</option>
-              <option value="3">5ft * 7ft Rugs</option>
-              <option value="4">3ft * 5ft Rugs</option>
-              <option value="5">10ft * 13ft Rugs</option>
-              <option value="6">Footmat</option>
-              <option value="7">Skirtings</option>
-              <option value="8">European Armstrong carpet</option>
-              <option value="9">Diffuser</option>
-              <option value="10">PVC vinyl tiles</option>
-              <option value="11">Vinyl plank</option>
-              <option value="12">Laminate floor</option>
-              <option value="13">Wall to wall rug</option>
-              <option value="14">8ft * 11ft Rugs</option>
+              {categoryList.length > 0 &&
+                categoryList.map((item) => {
+                  return (
+                    <option key={item.id} value={item.id}>
+                      {item.title}
+                    </option>
+                  );
+                })}
             </select>
           </div>
         </div>

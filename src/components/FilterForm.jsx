@@ -6,6 +6,7 @@ function FilterForm() {
     currentPage,
     queryProduct,
     setTotalPages,
+    categoryList,
   } = useContext(storeContext);
 
   //form data
@@ -48,6 +49,7 @@ function FilterForm() {
 
   //query products on current page change. this loads the next page
   useEffect(() => {
+    console.log(categoryList);
     if (
       filterPriceTo.trim().length === 0 ||
       filterPriceFrom.trim().length === 0 ||
@@ -64,6 +66,11 @@ function FilterForm() {
       );
     }
   }, [currentPage]);
+
+  //fetch catgegory list from server on app load
+  useEffect(() => {
+    console.log(categoryList);
+  }, [categoryList]);
 
   //reseting price in filter
   function resetPriceSearch(e) {
@@ -178,20 +185,14 @@ function FilterForm() {
                     onClick={filterCategory}
                     className="h-10 rounded border-gray-300 text-sm w-full border"
                   >
-                    <option value="1">7ft * 10ft Rugs</option>
-                    <option value="2">Throw pillows</option>
-                    <option value="3">5ft * 7ft Rugs</option>
-                    <option value="4">3ft * 5ft Rugs</option>
-                    <option value="5">10ft * 13ft Rugs</option>
-                    <option value="6">Footmat</option>
-                    <option value="7">Skirtings</option>
-                    <option value="8">European Armstrong carpet</option>
-                    <option value="9">Diffuser</option>
-                    <option value="10">PVC vinyl tiles</option>
-                    <option value="11">Vinyl plank</option>
-                    <option value="12">Laminate floor</option>
-                    <option value="13">Wall to wall rug</option>
-                    <option value="14">8ft * 11ft Rugs</option>
+
+                  {categoryList.length > 0 && categoryList.map((item) => {
+                    return (
+                      <option key={item.id} value={item.id}>
+                        {item.title}
+                      </option>
+                    );
+                  })}
                   </select>
 
                   <button

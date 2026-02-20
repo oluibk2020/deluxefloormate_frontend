@@ -24,56 +24,14 @@ export const StoreProvider = ({ children }) => {
   const [managersList, setManagersList] = useState([]);
   const [totalProducts, setTotalProducts] = useState(0)
   const [totalOrders, setTotalOrders] = useState(0)
+  const [categoryList, setCategoryList] = useState([
+  ]);
 
   //website url
   const API_URL = import.meta.env.VITE_BACKEND_URL;
   const APP_NAME = import.meta.env.VITE_APP_NAME;
   const token = localStorage.getItem("token");
 
-  //get token from localstorage
-
-  // const token = localStorage.getItem("token");
-  // let decodedPayload;
-
-  // function isTokenExpired(token) {
-  //   if (!token) return;
-
-  //   try {
-  //     const [, payload] = token.split(".");
-  //     decodedPayload = JSON.parse(atob(payload));
-  //     return decodedPayload.exp * 1000 < Date.now();
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // }
-
-  //check if loggedIn
-
-  // async function loginChecker() {
-  //   try {
-  //     //fetch token from local storage
-  //     const localStorageToken = token;
-  //     //set fullName from token
-
-  //     // console.log(localStorageToken);
-  //     const tokenExpiryStatus = isTokenExpired(localStorageToken);
-  //     if (tokenExpiryStatus === false) {
-  //       setIsAuth(true);
-  //       fetchOrders();
-  //       if (decodedPayload.isAdmin === true) {
-  //         setIsAdmin(true);
-  //       } else if (decodedPayload.isManager === true) {
-  //         setIsManager(true);
-  //       }
-  //     } else {
-  //       setIsAuth(false);
-  //       setIsAdmin(false);
-  //       localStorage.removeItem("token");
-  //     }
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // }
 
   // 2. Centralized Logout Function
   // We define this early so we can use it in the useEffect
@@ -102,8 +60,14 @@ export const StoreProvider = ({ children }) => {
     }
   };
 
+//fetch category list from server on app load
+  useEffect(() => {
+    categoryFetcher();
+  }, []);
+
   // 3. The "Auto-Logout" Logic
   useEffect(() => {
+
     const localToken = localStorage.getItem("token");
 
     if (!localToken) {
@@ -612,6 +576,37 @@ export const StoreProvider = ({ children }) => {
     }
   }
 
+  //fetch category list from server
+  async function categoryFetcher() {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`${API_URL}/category`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        const error = data.message;
+
+        if (typeof error === "string") {
+          toast.error(error);
+          setIsLoading(false);
+          return;
+        }
+
+        error.forEach((error) => {
+          toast.error(error);
+        });
+        setIsLoading(false);
+        return;
+      }
+      console.log(data, "from cat api");
+      setCategoryList(data);
+      setIsLoading(false);
+    } catch (error) {
+      toast.error("We are unable to get categories at the moment");
+      console.log(error);
+    }
+  }
+
   //handle page change
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
@@ -662,7 +657,9 @@ export const StoreProvider = ({ children }) => {
     managersList,
     fetchManagers,
     totalProducts,
-    totalOrders
+    totalOrders,
+    categoryList,
+    categoryFetcher
   };
 
   return (
