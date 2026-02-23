@@ -1,8 +1,9 @@
-import { useContext, useState, useEffect, useCallback } from "react";
+import { useContext, useState, useEffect, useMemo, useCallback } from "react";
 import { storeContext } from "../context/storeContext";
 import { Link } from "react-router-dom";
 import Spinner from "./Spinner";
 import { toast } from "react-toastify";
+import { GiQuakeStomp } from "react-icons/gi"; // This icon is not used in the original component, but kept if you plan to use it.
 import FilterForm from "./FilterForm";
 function ManageProducts() {
   const [title, setTitle] = useState("");
@@ -13,6 +14,8 @@ function ManageProducts() {
   const [categoryId, setCategoryId] = useState("");
   const [editMode, setEditMode] = useState(false);
   const [productId, setProductId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState(""); // New state for search query
+  const [advancedSearchMode, setAdvancedSearchMode] = useState(true);
 
   // ✅ NEW: Filters state
   const [filters, setFilters] = useState({
@@ -78,6 +81,25 @@ function ManageProducts() {
     queryProduct();
   }
 
+  // Memoize filtered products to prevent unnecessary re-renders of the list
+  const filteredProducts = useMemo(() => {
+    if (!storeList) return []; // Handle case where storeList might be null/undefined initially
+
+    // If search query is empty, return all products
+    if (searchQuery.trim() === "") {
+      return storeList;
+    }
+
+    // Filter products based on title (case-insensitive)
+    return storeList.filter((product) =>
+      product.title.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+  }, [storeList, searchQuery]);
+
+  //fetch catgegory list from server on app load
+  // useEffect(() => {
+  //   console.log(categoryList);
+  // }, [categoryList]);
 
   // Fetch all products on component mount (if not already fetched)
   useEffect(() => {
@@ -87,7 +109,7 @@ function ManageProducts() {
       filterPriceFrom,
       filterProductName,
     );
-  }, [currentPage]);
+  }, [currentPage]); 
 
   const updateProductHandler = useCallback(async () => {
     setIsLoading(true);
@@ -209,24 +231,48 @@ function ManageProducts() {
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
       {/* Top action bar: Upload Product & Search */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-        <div className="relative w-full sm:w-1/2 lg:w-1/3">
-          <FilterForm
-            filters={filters}
-            setFilters={setFilters}
-            onSearch={handleSearch}
-            onReset={handleReset}
-            categoryList={categoryList}
+        {/* Search Input */}
+        {/* <div className="relative w-full sm:w-1/2 lg:w-1/3">
+          <input
+            type="text"
+            placeholder="Search products by title..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out"
           />
-        </div>
-        {/* Upload products */}
-        
-          <Link
-            to="/admin/product-upload"
-            className="w-full sm:w-auto text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full shadow-lg transition duration-300 ease-in-out"
+          <svg
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            ➕ Upload New Product
-          </Link>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            ></path>
+          </svg>
+        </div> */}
+
+        {/* Upload Product Button */}
+        <Link
+          to="/admin/product-upload"
+          className="w-full sm:w-auto text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full shadow-lg transition duration-300 ease-in-out"
+        >
+          ➕ Upload New Product
+        </Link>
       </div>
+      {advancedSearchMode && (
+        <FilterForm
+          filters={filters}
+          setFilters={setFilters}
+          onSearch={handleSearch}
+          onReset={handleReset}
+          categoryList={categoryList}
+        />
+      )}
 
       {editMode && (
         <div className="bg-white shadow-xl rounded-lg p-6 mb-8 w-full lg:w-3/4 xl:w-1/2 mx-auto">
@@ -263,7 +309,7 @@ function ManageProducts() {
                 className="block text-gray-700 text-sm font-semibold mb-2"
                 htmlFor="price"
               >
-                Selling Price
+                Price
               </label>
               <input
                 className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out"
@@ -521,7 +567,7 @@ function ManageProducts() {
 
           <li>
             <div className="block h-8 w-8 rounded border border-gray-100 bg-white text-center leading-8 text-gray-900">
-              {currentPage}/{totalPages}
+              {currentPage}
             </div>
           </li>
 

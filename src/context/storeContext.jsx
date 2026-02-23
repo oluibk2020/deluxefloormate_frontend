@@ -532,25 +532,15 @@ export const StoreProvider = ({ children }) => {
     isFeatured = ""
   ) {
     try {
-      let response;
-      if (
-        categoryId.trim().length === 0 ||
-        maxPrice.trim().length === 0 ||
-        minPrice.trim().length === 0 ||
-        productName.trim().length === 0
-      ) {
-        isFeatured.trim().length !== 0 ? response = await fetch(
-          `${API_URL}/product/s?limit=20&page=${currentPage}&isFeatured=${isFeatured}`) : response = await fetch(
-            `${API_URL}/product/s?limit=20&page=${currentPage}`);
-          } else {
-            console.log("running all");
-            response = await fetch(
-              `${API_URL}/product/s?limit=20&page=${currentPage}&categoryId=${categoryId}&maxPrice=${maxPrice}&minPrice=${minPrice}&name=${productName}`,
-            );
-          }
-          
-          const data = await response.json();
-          console.log(isFeatured, "this is featured", data, "categoryId", categoryId);
+      let url = `${API_URL}/product/s?limit=20&page=${currentPage}`;
+      if (categoryId.trim().length > 0) url += `&categoryId=${categoryId}`;
+      if (maxPrice.trim().length > 0) url += `&maxPrice=${maxPrice}`;
+      if (minPrice.trim().length > 0) url += `&minPrice=${minPrice}`;
+      if (productName.trim().length > 0) url += `&name=${productName}`;
+      if (isFeatured.trim().length > 0) url += `&isFeatured=${isFeatured}`;
+
+      const response = await fetch(url);
+      const data = await response.json();
 
       if (!response.ok) {
         const error = data.message;
@@ -575,6 +565,57 @@ export const StoreProvider = ({ children }) => {
       console.error("Error fetching products:", error);
     }
   }
+  // async function queryProduct(
+  //   categoryId = "",
+  //   maxPrice = "",
+  //   minPrice = "",
+  //   productName = "",
+  //   isFeatured = ""
+  // ) {
+  //   try {
+  //     let response;
+  //     if (
+  //       categoryId.trim().length === 0 ||
+  //       maxPrice.trim().length === 0 ||
+  //       minPrice.trim().length === 0 ||
+  //       productName.trim().length === 0
+  //     ) {
+  //       isFeatured.trim().length !== 0 ? response = await fetch(
+  //         `${API_URL}/product/s?limit=20&page=${currentPage}&isFeatured=${isFeatured}`) : response = await fetch(
+  //           `${API_URL}/product/s?limit=20&page=${currentPage}`);
+  //         } else {
+  //           console.log("running all");
+  //           response = await fetch(
+  //             `${API_URL}/product/s?limit=20&page=${currentPage}&categoryId=${categoryId}&maxPrice=${maxPrice}&minPrice=${minPrice}&name=${productName}`,
+  //           );
+  //         }
+          
+  //         const data = await response.json();
+  //         console.log(isFeatured, "this is featured", data, "categoryId", categoryId);
+
+  //     if (!response.ok) {
+  //       const error = data.message;
+
+  //       if (typeof error === "string") {
+  //         toast.error(error);
+  //         setIsLoading(false);
+  //         return;
+  //       }
+
+  //       error.forEach((error) => {
+  //         toast.error(error);
+  //       });
+  //       setIsLoading(false);
+  //       return;
+  //     }
+
+  //     setStoreList(data.products);
+  //     setTotalPages(data.meta.totalPages);
+  //     setTotalProducts(data.meta.totalProducts)
+  //   } catch (error) {
+  //     console.error("Error fetching products:", error);
+  //   }
+  // }
 
   //fetch category list from server
   async function categoryFetcher() {
