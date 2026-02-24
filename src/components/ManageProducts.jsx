@@ -9,6 +9,8 @@ import {
   IoTrashOutline,
   IoEyeOutline,
   IoAddOutline,
+  IoCloudDoneOutline,
+  IoCloudOfflineOutline,
 } from "react-icons/io5";
 
 function ManageProducts() {
@@ -40,6 +42,11 @@ function ManageProducts() {
     totalPages,
     handlePageChange,
     categoryList,
+    fetchDiscountStatus,
+    setIncreasedPriceInPercentage,
+    increasedPriceInPercentage,
+    activateDiscount,
+    editDiscountStatus
   } = useContext(storeContext);
 
   const {
@@ -173,25 +180,97 @@ function ManageProducts() {
   return (
     <div className="min-h-screen bg-gray-50/50 pb-20">
       <div className="mx-auto max-w-screen-2xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* ================= TOP ACTION BAR ================= */}
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between mb-10">
-          <div className="flex-1 max-w-4xl bg-white p-6 rounded-2xl shadow-sm ring-1 ring-gray-100">
-            <FilterForm
-              filters={filters}
-              setFilters={setFilters}
-              onSearch={handleSearch}
-              onReset={handleReset}
-              categoryList={categoryList}
-            />
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-black text-gray-900 tracking-tight">
+              Store Management
+            </h1>
+            <p className="text-sm text-gray-500">
+              Monitor inventory and manage global pricing.
+            </p>
           </div>
-
           <Link
             to="/admin/product-upload"
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-200 transition-all hover:bg-blue-700 hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-200 transition-all hover:bg-blue-700 active:scale-95"
           >
             <IoAddOutline className="text-xl" />
-            Upload New Product
+            New Product
           </Link>
+        </div>
+        {/* ================= TOP ACTION BAR ================= */}
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between mb-10">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 mb-10">
+            {/* Filters Section */}
+            <div className="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+              <FilterForm
+                filters={filters}
+                setFilters={setFilters}
+                onSearch={handleSearch}
+                onReset={handleReset}
+                categoryList={categoryList}
+              />
+            </div>
+
+            {/* Global Discount Section */}
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div
+                    className={`p-2 rounded-lg ${activateDiscount ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-500"}`}
+                  >
+                    {activateDiscount ? (
+                      <IoCloudDoneOutline size={20} />
+                    ) : (
+                      <IoCloudOfflineOutline size={20} />
+                    )}
+                  </div>
+                  <h3 className="font-bold text-gray-800">Global Discount</h3>
+                </div>
+                <span
+                  className={`text-[10px] uppercase font-black px-2 py-1 rounded-md ${activateDiscount ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}
+                  >
+                  {activateDiscount ? "Active" : "Inactive"}
+                </span>
+              </div>
+                  <span className="text-xs text-gray-500">Increase price globally to activate discount on all products</span>
+
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  editDiscountStatus(
+                    !activateDiscount,
+                    increasedPriceInPercentage,
+                  );
+                }}
+                className="space-y-3"
+              >
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">
+                    %
+                  </span>
+                  <input
+                    type="number"
+                    placeholder="0"
+                    className="w-full pl-8 pr-4 py-2 bg-gray-50 border-gray-200 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500"
+                    value={increasedPriceInPercentage}
+                    onChange={(e) =>
+                      setIncreasedPriceInPercentage(e.target.value)
+                    }
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className={`w-full py-2.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${
+                    activateDiscount
+                      ? "bg-red-50 text-red-600 hover:bg-red-100"
+                      : "bg-gray-900 text-white hover:bg-black shadow-md"
+                  }`}
+                >
+                  {activateDiscount ? "Stop Discount" : "Apply Discount"}
+                </button>
+              </form>
+            </div>
+          </div>
         </div>
 
         {/* ================= EDIT FORM MODAL-LIKE SECTION ================= */}

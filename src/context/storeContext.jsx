@@ -22,15 +22,18 @@ export const StoreProvider = ({ children }) => {
   const [isManager, setIsManager] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [managersList, setManagersList] = useState([]);
-  const [totalProducts, setTotalProducts] = useState(0)
-  const [totalOrders, setTotalOrders] = useState(0)
-  const [categoryList, setCategoryList] = useState([
-  ]);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const [categoryList, setCategoryList] = useState([]);
+  const [activateDiscount, setActivateDiscount] = useState(true);
+  const [increasedPriceInPercentage, setIncreasedPriceInPercentage] =
+    useState(1);
 
   //website url
   const API_URL = import.meta.env.VITE_BACKEND_URL;
   const APP_NAME = import.meta.env.VITE_APP_NAME;
   const token = localStorage.getItem("token");
+
 
 
   // 2. Centralized Logout Function
@@ -60,14 +63,60 @@ export const StoreProvider = ({ children }) => {
     }
   };
 
-//fetch category list from server on app load
+  //fetch category list from server on app load
   useEffect(() => {
     categoryFetcher();
+    fetchDiscountStatus();
   }, []);
+
+  async function fetchDiscountStatus() {
+    try {
+      const response = await fetch(`${API_URL}/product/discount-status`, {
+        method: "GET",
+      });
+
+      if (!response.ok) {
+      return  toast.error("Failed to fetch discount status");
+      }
+
+      const data = await response.json();
+
+      setActivateDiscount(data.isActivated);
+      setIncreasedPriceInPercentage(data.percentageAmount);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  async function editDiscountStatus(status, percentageAmount) {
+    try {
+      const response = await fetch(`${API_URL}/product/manage-discount`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          isActivated: Boolean(status),
+          percentageAmount: Number(percentageAmount),
+        }),
+      });
+
+      if (!response.ok) {
+       return toast.error("Failed to manage discount status");
+      }
+
+      const data = await response.json();
+
+      await fetchDiscountStatus(); // Refresh the discount status after managing it
+
+      toast.success(`Discount has been ${status ? "activated" : "deactivated"} successfully!`);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   // 3. The "Auto-Logout" Logic
   useEffect(() => {
-
     const localToken = localStorage.getItem("token");
 
     if (!localToken) {
@@ -90,7 +139,6 @@ export const StoreProvider = ({ children }) => {
         if (decoded.isAdmin) setIsAdmin(true);
         if (decoded.isManager) setIsManager(true);
         // If your token has a name, set it here: setFullName(decoded.name);
-
 
         // CALCULATE TIME LEFT and SET TIMER
         const timeUntilExpiry = (decoded.exp - currentTime) * 1000; // Convert back to ms
@@ -257,8 +305,17 @@ export const StoreProvider = ({ children }) => {
       let response;
       if (limit === 0) {
         // Fetch all orders if limit is 0
+        response = await fetch(`${API_URL}/order`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+      } else {
+        // Fetch orders with pagination
         response = await fetch(
-          `${API_URL}/order`,
+          `${API_URL}/order?limit=${limit}&page=${currentPage}`,
           {
             method: "GET",
             headers: {
@@ -267,15 +324,6 @@ export const StoreProvider = ({ children }) => {
             },
           },
         );
-      } else{
-        // Fetch orders with pagination
-        response = await fetch(`${API_URL}/order?limit=${limit}&page=${currentPage}`, {
-         method: "GET",
-         headers: {
-           "Content-Type": "application/json",
-           Authorization: `Bearer ${localStorage.getItem("token")}`,
-         },
-       });
       }
 
       const data = await response.json();
@@ -306,8 +354,8 @@ export const StoreProvider = ({ children }) => {
       // console.log(data);
       setFullName(data.firstName);
       setOrderList(data);
-      setTotalPages(data.meta.totalPages)
-      setTotalOrders(data.meta.totalOrders)
+      setTotalPages(data.meta.totalPages);
+      setTotalOrders(data.meta.totalOrders);
       setIsLoading(false);
       return data;
     } catch (error) {
@@ -529,7 +577,7 @@ export const StoreProvider = ({ children }) => {
     maxPrice = "",
     minPrice = "",
     productName = "",
-    isFeatured = ""
+    isFeatured = "",
   ) {
     try {
       let url = `${API_URL}/product/s?limit=20&page=${currentPage}`;
@@ -560,7 +608,7 @@ export const StoreProvider = ({ children }) => {
 
       setStoreList(data.products);
       setTotalPages(data.meta.totalPages);
-      setTotalProducts(data.meta.totalProducts)
+      setTotalProducts(data.meta.totalProducts);
     } catch (error) {
       console.error("Error fetching products:", error);
     }
@@ -589,7 +637,7 @@ export const StoreProvider = ({ children }) => {
   //             `${API_URL}/product/s?limit=20&page=${currentPage}&categoryId=${categoryId}&maxPrice=${maxPrice}&minPrice=${minPrice}&name=${productName}`,
   //           );
   //         }
-          
+
   //         const data = await response.json();
   //         console.log(isFeatured, "this is featured", data, "categoryId", categoryId);
 
@@ -700,7 +748,12 @@ export const StoreProvider = ({ children }) => {
     totalProducts,
     totalOrders,
     categoryList,
-    categoryFetcher
+    categoryFetcher,
+    activateDiscount,
+    increasedPriceInPercentage,
+    setIncreasedPriceInPercentage,
+    fetchDiscountStatus,
+    editDiscountStatus,
   };
 
   return (

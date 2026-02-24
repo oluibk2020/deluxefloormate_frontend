@@ -8,17 +8,29 @@ import {
 } from "react-icons/io5";
 
 function Product() {
-  const { productData, cartData, productFetcher, addNewProductToCart } =
-    useContext(storeContext);
+  const {
+    productData,
+    cartData,
+    productFetcher,
+    addNewProductToCart,
+    activateDiscount,
+    increasedPriceInPercentage,
+    storeList,
+    queryProduct,
+  } = useContext(storeContext);
 
   const params = useParams();
   const navigate = useNavigate();
+  const { price, imageUrl, title, description, id, quantity, category } =
+    productData;
 
   useEffect(() => {
+    queryProduct(category?.id, "", "", "", "");
+    console.log(productData);
     productFetcher(params.id);
   }, [params.id]);
 
-  const { price, imageUrl, title, description, id, quantity } = productData;
+  
 
   function addToCart() {
     addNewProductToCart(productData);
@@ -59,18 +71,32 @@ function Product() {
           <div className="flex flex-col justify-center">
             <div className="space-y-4">
               <span className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-blue-700">
-                New Arrival
+                {category?.title}
               </span>
 
               <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">
                 {title}
               </h1>
-
-              <div className="flex items-baseline gap-4">
-                <p className="text-2xl font-bold text-gray-900">
-                  ₦{Number(price).toLocaleString()}
-                </p>
-              </div>
+              {activateDiscount && (
+                <div className="flex items-center gap-3">
+                  <p className="text-2xl font-bold text-gray-900 line-through">
+                    ₦
+                    {Number(
+                      price * (1 + increasedPriceInPercentage / 100),
+                    ).toLocaleString()}
+                  </p>
+                  <p className="text-2xl font-bold text-red-600">
+                    ₦{Number(price).toLocaleString()}
+                  </p>
+                </div>
+              )}
+              {!activateDiscount && (
+                <div className="flex items-baseline gap-4">
+                  <p className="text-2xl font-bold text-gray-900">
+                    ₦{Number(price).toLocaleString()}
+                  </p>
+                </div>
+              )}
 
               <div className="border-t border-gray-100 pt-6">
                 <h3 className="text-sm font-bold uppercase tracking-widest text-gray-900">
@@ -128,6 +154,46 @@ function Product() {
             </div>
           </div>
         </div>
+      </div>
+      <div className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+        <h2 className="text-xl font-bold text-gray-900 sm:text-3xl mb-7">
+          Other {category?.title} Products You might Like
+        </h2>
+        <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {storeList.map((item) => {
+            return (
+              <li key={item.id}>
+                <Link
+                  to={`/product/${item.id}`}
+                  className="group block overflow-hidden"
+                >
+                  <img
+                    src={item.imageUrl}
+                    alt=""
+                    className="h-[350px] w-full object-cover transition duration-500 group-hover:scale-105 sm:h-[450px]"
+                  />
+
+                  <div className="relative bg-white pt-3">
+                    <h3 className=" text-base text-gray-700 group-hover:underline group-hover:underline-offset-4">
+                      {item.title.replace(/\b\w/g, (match) =>
+                        match.toUpperCase(),
+                      )}
+                    </h3>
+
+                    <p className="mt-2">
+                      <span className="sr-only"> Regular Price </span>
+
+                      <span className="tracking-wider text-gray-900">
+                        {" "}
+                        ₦{Number(item.price).toLocaleString()} NGN{" "}
+                      </span>
+                    </p>
+                  </div>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       </div>
     </div>
   );

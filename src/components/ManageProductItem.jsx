@@ -9,8 +9,12 @@ import {
 } from "react-icons/io5";
 
 function ManageProductItem() {
-  const { productData, productFetcher } =
-    useContext(storeContext);
+  const {
+    productData,
+    productFetcher,
+    activateDiscount,
+    increasedPriceInPercentage,
+  } = useContext(storeContext);
 
   const params = useParams();
   const navigate = useNavigate();
@@ -62,11 +66,26 @@ function ManageProductItem() {
                 {title}
               </h1>
 
-              <div className="flex items-baseline gap-4">
-                <p className="text-2xl font-bold text-gray-900">
-                  ₦{Number(price).toLocaleString()}
-                </p>
-              </div>
+              {activateDiscount && (
+                <div className="flex items-center gap-3">
+                  <p className="text-2xl font-bold text-gray-900 line-through">
+                    ₦
+                    {Number(
+                      price * (1 + increasedPriceInPercentage / 100),
+                    ).toLocaleString()}
+                  </p>
+                  <p className="text-2xl font-bold text-red-600">
+                    ₦{Number(price).toLocaleString()}
+                  </p>
+                </div>
+              )}
+              {!activateDiscount && (
+                <div className="flex items-baseline gap-4">
+                  <p className="text-2xl font-bold text-gray-900">
+                    ₦{Number(price).toLocaleString()}
+                  </p>
+                </div>
+              )}
 
               <div className="border-t border-gray-100 pt-6">
                 <h3 className="text-sm font-bold uppercase tracking-widest text-gray-900">
