@@ -40,15 +40,15 @@ function Product() {
   const isProductInCart = cartData.some((cartItem) => cartItem.id === id);
 
   return (
-    <div className="min-h-screen bg-white pb-12">
+    <div className="min-h-screen bg-white pb-12" id="product-top">
       {/* Breadcrumb / Back Button */}
       <div className="mx-auto max-w-screen-xl px-4 py-6 sm:px-6 lg:px-8">
-        <button
-          onClick={() => navigate(-1)}
+        <Link
+          to= "/shop"
           className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors"
         >
           <IoArrowBackOutline /> Back to Shop
-        </button>
+        </Link>
       </div>
 
       <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
@@ -163,8 +163,11 @@ function Product() {
           {storeList.map((item) => {
             return (
               <li key={item.id}>
-                <Link
-                  to={`/product/${item.id}`}
+                <button
+                  onClick={() => {
+                    productFetcher(item.id);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
                   className="group block overflow-hidden"
                 >
                   <img
@@ -189,7 +192,7 @@ function Product() {
                       </span>
                     </p>
                   </div>
-                </Link>
+                </button>
               </li>
             );
           })}

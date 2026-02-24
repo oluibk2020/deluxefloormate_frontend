@@ -1,6 +1,6 @@
 import { useContext, useState, useEffect, useCallback } from "react";
 import { storeContext } from "../context/storeContext";
-import { Link } from "react-router-dom";
+import { Link , useNavigate} from "react-router-dom";
 import Spinner from "./Spinner";
 import { toast } from "react-toastify";
 import FilterForm from "./FilterForm";
@@ -29,6 +29,8 @@ function ManageProducts() {
     filterPriceTo: "",
     filterProductName: "",
   });
+
+  const navigate = useNavigate();
 
   const {
     API_URL,
@@ -167,6 +169,7 @@ function ManageProducts() {
           toast.error("Failed to delete product");
         }
       } catch (error) {
+        console.log(error);
         toast.error("An error occurred.");
       } finally {
         setIsLoading(false);
@@ -450,13 +453,16 @@ function ManageProducts() {
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-2">
                         {/* VIEW BUTTON - Subtle Gray */}
-                        <Link
-                          to={`/admin/product/${product.id}`}
+                        <button
+                          onClick={() => {
+                            navigate(`/admin/product/${product.id}`);
+                            window.scrollTo({ top: 0, behavior: "smooth" });
+                          }}
                           title="View Product"
                           className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 shadow-sm transition-all hover:bg-gray-50 hover:text-blue-600 hover:border-blue-200"
                         >
                           <IoEyeOutline size={18} />
-                        </Link>
+                        </button>
 
                         {/* EDIT BUTTON - Soft Yellow/Amber */}
                         <button

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { storeContext } from "../context/storeContext";
 import FilterForm from "../components/FilterForm";
@@ -12,6 +12,8 @@ function Shop() {
     queryProduct,
     categoryList,
   } = useContext(storeContext);
+
+  const navigate = useNavigate();
 
   const [filters, setFilters] = useState({
     categoryId: "",
@@ -85,8 +87,11 @@ function Shop() {
         <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {storeList.map((item) => (
             <li key={item.id} className="group flex h-full">
-              <Link
-                to={`/product/${item.id}`}
+              <button
+                onClick={() => {
+                  navigate(`/product/${item.id}`);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
                 className="relative flex w-full flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-100 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
               >
                 {/* Image Container */}
@@ -133,7 +138,7 @@ function Shop() {
                     </span>
                   </div>
                 </div>
-              </Link>
+              </button>
             </li>
           ))}
         </ul>

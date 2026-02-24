@@ -14,29 +14,32 @@ function ManageProductItem() {
     productFetcher,
     activateDiscount,
     increasedPriceInPercentage,
+    queryProduct
   } = useContext(storeContext);
+
+  const { price, imageUrl, title, description, id, quantity, category } = productData;
 
   const params = useParams();
   const navigate = useNavigate();
 
   //auto fetching of product at page load
   useEffect(() => {
+     queryProduct(category?.id, "", "", "", "");
     productFetcher(params.id);
   }, [params.id]);
 
-  const { price, imageUrl, title, description, id, quantity } = productData;
 
 
   return (
     <div className="min-h-screen bg-white pb-12">
       {/* Breadcrumb / Back Button */}
       <div className="mx-auto max-w-screen-xl px-4 py-6 sm:px-6 lg:px-8">
-        <button
-          onClick={() => navigate(-1)}
+        <Link
+          to={"/admin/manage-products"}
           className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors"
         >
           <IoArrowBackOutline /> Back to Product List
-        </button>
+        </Link>
       </div>
 
       <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
@@ -59,7 +62,7 @@ function ManageProductItem() {
           <div className="flex flex-col justify-center">
             <div className="space-y-4">
               <span className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-blue-700">
-                New Arrival
+                {category?.title}
               </span>
 
               <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">
