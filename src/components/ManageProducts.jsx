@@ -4,6 +4,13 @@ import { Link } from "react-router-dom";
 import Spinner from "./Spinner";
 import { toast } from "react-toastify";
 import FilterForm from "./FilterForm";
+import {
+  IoPencilOutline,
+  IoTrashOutline,
+  IoEyeOutline,
+  IoAddOutline,
+} from "react-icons/io5";
+
 function ManageProducts() {
   const [title, setTitle] = useState("");
   const [cost, setCost] = useState("");
@@ -14,7 +21,6 @@ function ManageProducts() {
   const [editMode, setEditMode] = useState(false);
   const [productId, setProductId] = useState(null);
 
-  // ✅ NEW: Filters state
   const [filters, setFilters] = useState({
     categoryId: "",
     filterPriceFrom: "",
@@ -24,9 +30,9 @@ function ManageProducts() {
 
   const {
     API_URL,
-    storeList, // This is your array of all products
+    storeList,
     token,
-    queryProduct, // This function should ideally fetch ALL products without a query for initial load
+    queryProduct,
     isLoading,
     setIsLoading,
     totalProducts,
@@ -43,7 +49,6 @@ function ManageProducts() {
     filterProductName,
   } = filters;
 
-  // ✅ Fetch products when page changes (respect filters)
   useEffect(() => {
     queryProduct(
       filterCategoryId,
@@ -53,7 +58,6 @@ function ManageProducts() {
     );
   }, [currentPage]);
 
-  // ✅ Search handler
   function handleSearch() {
     handlePageChange(1);
     queryProduct(
@@ -64,7 +68,6 @@ function ManageProducts() {
     );
   }
 
-  // ✅ Reset handler
   function handleReset() {
     const emptyFilters = {
       categoryId: "",
@@ -72,22 +75,10 @@ function ManageProducts() {
       filterPriceTo: "",
       filterProductName: "",
     };
-
     setFilters(emptyFilters);
     handlePageChange(1);
     queryProduct();
   }
-
-
-  // Fetch all products on component mount (if not already fetched)
-  useEffect(() => {
-    queryProduct(
-      filterCategoryId,
-      filterPriceTo,
-      filterPriceFrom,
-      filterProductName,
-    );
-  }, [currentPage]);
 
   const updateProductHandler = useCallback(async () => {
     setIsLoading(true);
@@ -99,8 +90,8 @@ function ManageProducts() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          title: title,
-          description: description,
+          title,
+          description,
           price: Number(price),
           quantity: Number(quantity),
           cost: Number(cost),
@@ -110,26 +101,19 @@ function ManageProducts() {
       const data = await response.json();
       if (!response.ok) {
         const error = data.message;
-
         if (typeof error === "string") {
           toast.error(error);
-          setIsLoading(false);
-          return;
+        } else {
+          error.forEach((err) => toast.error(err));
         }
-
-        error.forEach((error) => {
-          toast.error(error);
-        });
-        setIsLoading(false);
         return;
       }
 
       toast.success("Product updated successfully");
-      await queryProduct(); // Refresh the product list after update
+      await queryProduct();
       clearForm();
       setEditMode(false);
     } catch (error) {
-      console.error("Error updating product:", error);
       toast.error("An error occurred while updating the product.");
     } finally {
       setIsLoading(false);
@@ -140,8 +124,8 @@ function ManageProducts() {
     title,
     description,
     price,
-    categoryId,
     quantity,
+    cost,
     token,
     queryProduct,
     setIsLoading,
@@ -158,10 +142,8 @@ function ManageProducts() {
 
   const deleteProductHandler = useCallback(
     async (id) => {
-      if (!window.confirm("Are you sure you want to delete this product?")) {
+      if (!window.confirm("Are you sure you want to delete this product?"))
         return;
-      }
-
       setIsLoading(true);
       try {
         const response = await fetch(`${API_URL}/product/delete/${id}`, {
@@ -171,289 +153,233 @@ function ManageProducts() {
             Authorization: `Bearer ${token}`,
           },
         });
-
-        const data = await response.json();
-        if (!response.ok) {
-          const error = data.message;
-
-          if (typeof error === "string") {
-            toast.error(error);
-            setIsLoading(false);
-            return;
-          }
-
-          error.forEach((error) => {
-            toast.error(error);
-          });
-          setIsLoading(false);
-          return;
+        if (response.ok) {
+          toast.success("Product deleted successfully");
+          await queryProduct();
+        } else {
+          toast.error("Failed to delete product");
         }
-
-        toast.success("Product deleted successfully");
-        await queryProduct(); // Refresh the product list after deletion
       } catch (error) {
-        console.error("Error deleting product:", error);
-        toast.error("An error occurred while deleting the product.");
+        toast.error("An error occurred.");
       } finally {
         setIsLoading(false);
       }
     },
-    [API_URL, token, filters],
+    [API_URL, token, queryProduct],
   );
 
-  if (isLoading) {
-    return <Spinner />;
-  }
+  if (isLoading) return <Spinner />;
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 lg:p-8">
-      {/* Top action bar: Upload Product & Search */}
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-        <div className="relative w-full sm:w-1/2 lg:w-1/3">
-          <FilterForm
-            filters={filters}
-            setFilters={setFilters}
-            onSearch={handleSearch}
-            onReset={handleReset}
-            categoryList={categoryList}
-          />
-        </div>
-        {/* Upload products */}
-        
+    <div className="min-h-screen bg-gray-50/50 pb-20">
+      <div className="mx-auto max-w-screen-2xl px-4 py-8 sm:px-6 lg:px-8">
+        {/* ================= TOP ACTION BAR ================= */}
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between mb-10">
+          <div className="flex-1 max-w-4xl bg-white p-6 rounded-2xl shadow-sm ring-1 ring-gray-100">
+            <FilterForm
+              filters={filters}
+              setFilters={setFilters}
+              onSearch={handleSearch}
+              onReset={handleReset}
+              categoryList={categoryList}
+            />
+          </div>
+
           <Link
             to="/admin/product-upload"
-            className="w-full sm:w-auto text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full shadow-lg transition duration-300 ease-in-out"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-200 transition-all hover:bg-blue-700 hover:-translate-y-0.5"
           >
-            ➕ Upload New Product
+            <IoAddOutline className="text-xl" />
+            Upload New Product
           </Link>
-      </div>
+        </div>
 
-      {editMode && (
-        <div className="bg-white shadow-xl rounded-lg p-6 mb-8 w-full lg:w-3/4 xl:w-1/2 mx-auto">
-          <h2 className="text-3xl font-extrabold text-gray-800 mb-6 text-center">
-            Update Product 📝
-          </h2>
-          <form
-            id="updateProductForm"
-            onSubmit={(e) => {
-              e.preventDefault();
-              updateProductHandler();
-            }}
-            className="space-y-5"
-          >
-            <div>
-              <label
-                className="block text-gray-700 text-sm font-semibold mb-2"
-                htmlFor="title"
-              >
-                Title
-              </label>
-              <input
-                className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out"
-                id="title"
-                type="text"
-                placeholder="Enter product title"
-                required
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
+        {/* ================= EDIT FORM MODAL-LIKE SECTION ================= */}
+        {editMode && (
+          <div className="mb-12 overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-gray-200 animate-in fade-in slide-in-from-top-4 duration-300">
+            <div className="bg-gray-900 px-6 py-4">
+              <h2 className="text-lg font-bold text-white">
+                Edit Product Details
+              </h2>
             </div>
-            <div>
-              <label
-                className="block text-gray-700 text-sm font-semibold mb-2"
-                htmlFor="price"
-              >
-                Selling Price
-              </label>
-              <input
-                className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out"
-                id="price"
-                type="number"
-                placeholder="Enter price"
-                required
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-              />
-            </div>
-            <div>
-              <label
-                className="block text-gray-700 text-sm font-semibold mb-2"
-                htmlFor="costPrice"
-              >
-                Cost Price
-              </label>
-              <input
-                className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out"
-                id="costPrice"
-                type="number"
-                placeholder="Enter Cost price"
-                required
-                value={cost}
-                onChange={(e) => setCost(e.target.value)}
-              />
-            </div>
-            <div>
-              <label
-                className="block text-gray-700 text-sm font-semibold mb-2"
-                htmlFor="quantity"
-              >
-                Quantity
-              </label>
-              <input
-                className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out"
-                id="quantity"
-                type="number"
-                placeholder="Enter Quantity"
-                required
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-              />
-            </div>
-            <div>
-              <label
-                className="block text-gray-700 text-sm font-semibold mb-2"
-                htmlFor="description"
-              >
-                Description
-              </label>
-              <textarea
-                className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out h-32 resize-none"
-                id="description"
-                placeholder="Enter product description"
-                required
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              ></textarea>
-            </div>
-
-            <div>
-              <label
-                className="block text-gray-700 text-sm font-semibold mb-2"
-                htmlFor="category"
-              >
-                Category
-              </label>
-              <select
-                className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out"
-                id="category"
-                required
-                value={categoryId}
-                onChange={(e) => setCategoryId(e.target.value)}
-              >
-                <option value="">Choose a category</option>
-                {categoryList.length > 0 &&
-                  categoryList.map((item) => {
-                    return (
+            <form
+              id="updateProductForm"
+              onSubmit={(e) => {
+                e.preventDefault();
+                updateProductHandler();
+              }}
+              className="p-8"
+            >
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <div className="lg:col-span-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
+                    Product Title
+                  </label>
+                  <input
+                    className="w-full rounded-xl border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:border-blue-600 focus:ring-blue-600"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
+                    Category
+                  </label>
+                  <select
+                    className="w-full rounded-xl border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:border-blue-600"
+                    value={categoryId}
+                    onChange={(e) => setCategoryId(e.target.value)}
+                    required
+                  >
+                    <option value="">Choose category</option>
+                    {categoryList.map((item) => (
                       <option key={item.id} value={item.id}>
                         {item.title}
                       </option>
-                    );
-                  })}
-              </select>
-            </div>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
+                    Cost Price (₦)
+                  </label>
+                  <input
+                    type="number"
+                    className="w-full rounded-xl border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:border-blue-600"
+                    value={cost}
+                    onChange={(e) => setCost(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
+                    Selling Price (₦)
+                  </label>
+                  <input
+                    type="number"
+                    className="w-full rounded-xl border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:border-blue-600"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
+                    Stock Quantity
+                  </label>
+                  <input
+                    type="number"
+                    className="w-full rounded-xl border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:border-blue-600"
+                    value={quantity}
+                    onChange={(e) => setQuantity(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="md:col-span-2 lg:col-span-3">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
+                    Description
+                  </label>
+                  <textarea
+                    className="w-full rounded-xl border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:border-blue-600 h-28"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="mt-8 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditMode(false);
+                    clearForm();
+                  }}
+                  className="rounded-xl px-6 py-3 text-sm font-bold text-gray-500 hover:bg-gray-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-xl bg-blue-600 px-10 py-3 text-sm font-bold text-white shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
 
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
-              <button
-                className="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:shadow-outline transform transition duration-300 ease-in-out hover:scale-105"
-                type="submit"
-              >
-                Update Product
-              </button>
-              <button
-                className="w-full sm:w-auto bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:shadow-outline transform transition duration-300 ease-in-out hover:scale-105"
-                type="button"
-                onClick={() => {
-                  setEditMode(false);
-                  clearForm();
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+        {/* ================= PRODUCT TABLE ================= */}
+        <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+          <div className="border-b border-gray-100 px-6 py-5 flex items-center justify-between">
+            <h2 className="text-xl font-bold text-gray-900">
+              Inventory Catalog
+            </h2>
+            <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-600">
+              {totalProducts} Total Items
+            </span>
+          </div>
 
-      <div className="bg-white shadow-xl rounded-lg overflow-hidden mt-10">
-        <h2 className="text-3xl font-extrabold text-gray-800 p-6 text-center border-b border-gray-200">
-          Product Catalog 📋
-        </h2>
-        <h3 className="text-2xl font-bold text-gray-800 p-6 text-center">
-          Total Products: {totalProducts}
-        </h3>
-        <div className="mt-8">
-          <p className="text-sm text-gray-500">
-            Showing <span> {currentPage} </span> of {totalPages} pages
-          </p>
-        </div>
-        <div className="overflow-x-auto">
-          {storeList.length === 0 ? (
-            <p className="text-center text-gray-600 py-8 text-lg">
-              "No products available to manage."
-            </p>
-          ) : (
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="bg-gray-50/50 border-b border-gray-100">
                 <tr>
-                  <th
-                    scope="col"
-                    className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Title
+                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">
+                    Product
                   </th>
-                  <th
-                    scope="col"
-                    className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Image
+                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">
+                    Cost
                   </th>
-                  <th
-                    scope="col"
-                    className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Cost Price
+                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">
+                    Price
                   </th>
-                  <th
-                    scope="col"
-                    className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Selling Price
-                  </th>
-                  <th
-                    scope="col"
-                    className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
+                  <th className="px-6 py-4 text-right text-xs font-bold uppercase tracking-wider text-gray-500">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-100">
                 {storeList.map((product) => (
-                  <tr key={product.id} className="hover:bg-gray-50">
-                    <td className="py-4 px-6 text-sm font-medium text-gray-900">
-                      {product.title}
+                  <tr
+                    key={product.id}
+                    className="group hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-4">
+                        <img
+                          src={product.imageUrl}
+                          alt=""
+                          className="h-12 w-12 rounded-lg object-cover ring-1 ring-gray-200"
+                        />
+                        <div>
+                          <p className="font-semibold text-gray-900 line-clamp-1">
+                            {product.title}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            Stock: {product.quantity}
+                          </p>
+                        </div>
+                      </div>
                     </td>
-                    <td className="py-4 px-6">
-                      <img
-                        src={product.imageUrl}
-                        alt={product.title}
-                        className="h-16 w-16 object-cover rounded-md shadow-sm"
-                      />
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      ₦{Number(product.cost).toLocaleString()}
                     </td>
-                    <td className="py-4 px-6 text-sm text-gray-700">
-                      ₦{Number(product.cost).toLocaleString()} NGN
+                    <td className="px-6 py-4 text-sm font-bold text-gray-900">
+                      ₦{Number(product.price).toLocaleString()}
                     </td>
-                    <td className="py-4 px-6 text-sm text-gray-700">
-                      ₦{Number(product.price).toLocaleString()} NGN
-                    </td>
-                    <td className="py-4 px-6">
-                      <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-end gap-2">
+                        {/* VIEW BUTTON - Subtle Gray */}
                         <Link
                           to={`/admin/product/${product.id}`}
-                          className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out"
+                          title="View Product"
+                          className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 shadow-sm transition-all hover:bg-gray-50 hover:text-blue-600 hover:border-blue-200"
                         >
-                          View
+                          <IoEyeOutline size={18} />
                         </Link>
+
+                        {/* EDIT BUTTON - Soft Yellow/Amber */}
                         <button
                           onClick={() => {
                             setEditMode(true);
@@ -464,25 +390,21 @@ function ManageProducts() {
                             setCategoryId(product.categoryId);
                             setQuantity(product.quantity);
                             setCost(product.cost);
-
-                            //navigate to the update form
-                            document
-                              .getElementById("updateProductForm")
-                              .scrollIntoView({ behavior: "smooth" });
+                            window.scrollTo({ top: 0, behavior: "smooth" });
                           }}
-                          type="button"
-                          className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-gray-800 bg-yellow-400 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-300 transition duration-150 ease-in-out"
+                          title="Edit Product"
+                          className="flex h-9 w-9 items-center justify-center rounded-lg border border-amber-100 bg-amber-50 text-amber-600 shadow-sm transition-all hover:bg-amber-100 hover:text-amber-700"
                         >
-                          Edit
+                          <IoPencilOutline size={18} />
                         </button>
+
+                        {/* DELETE BUTTON - Soft Red */}
                         <button
-                          type="button"
-                          onClick={() => {
-                            deleteProductHandler(product.id);
-                          }}
-                          className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 ease-in-out"
+                          onClick={() => deleteProductHandler(product.id)}
+                          title="Delete Product"
+                          className="flex h-9 w-9 items-center justify-center rounded-lg border border-red-100 bg-red-50 text-red-500 shadow-sm transition-all hover:bg-red-100 hover:text-red-700"
                         >
-                          Delete
+                          <IoTrashOutline size={18} />
                         </button>
                       </div>
                     </td>
@@ -490,69 +412,41 @@ function ManageProducts() {
                 ))}
               </tbody>
             </table>
-          )}
-        </div>
-        <ol className="mt-8 flex justify-center gap-1 text-xs font-medium">
-          <li>
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className={
-                currentPage === 1
-                  ? "cursor-not-allowed inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100 bg-gray-200 text-gray-400"
-                  : "inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100"
-              }
-            >
-              <span className="sr-only">Prev Page</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-3 w-3"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
-          </li>
+            {storeList.length === 0 && (
+              <div className="py-20 text-center">
+                <p className="text-gray-400">
+                  No products found in the inventory.
+                </p>
+              </div>
+            )}
+          </div>
 
-          <li>
-            <div className="block h-8 w-8 rounded border border-gray-100 bg-white text-center leading-8 text-gray-900">
-              {currentPage}/{totalPages}
+          {/* Pagination */}
+          <div className="border-t border-gray-100 px-6 py-4 bg-gray-50/30 flex items-center justify-between">
+            <p className="text-sm text-gray-500">
+              Page {currentPage} of {totalPages}
+            </p>
+            <div className="flex gap-2">
+              <button
+                disabled={currentPage === 1}
+                onClick={() => handlePageChange(currentPage - 1)}
+                className="rounded-lg border bg-white px-4 py-2 text-xs font-bold text-gray-700 shadow-sm hover:bg-gray-50 disabled:opacity-50"
+              >
+                Prev
+              </button>
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => handlePageChange(currentPage + 1)}
+                className="rounded-lg border bg-white px-4 py-2 text-xs font-bold text-gray-700 shadow-sm hover:bg-gray-50 disabled:opacity-50"
+              >
+                Next
+              </button>
             </div>
-          </li>
-
-          <li>
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className={
-                currentPage === totalPages
-                  ? "cursor-not-allowed inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100 bg-gray-200 text-gray-400"
-                  : "inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100"
-              }
-            >
-              <span className="sr-only">Next Page</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-3 w-3"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
-          </li>
-        </ol>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
+
 export default ManageProducts;

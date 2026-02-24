@@ -1,9 +1,8 @@
-import { useContext, useState, useEffect, useMemo, useCallback } from "react";
+import { useContext, useState, useEffect, useCallback } from "react";
 import { storeContext } from "../context/storeContext";
 import { Link } from "react-router-dom";
 import Spinner from "./Spinner";
 import { toast } from "react-toastify";
-import { GiQuakeStomp } from "react-icons/gi"; // This icon is not used in the original component, but kept if you plan to use it.
 import FilterForm from "./FilterForm";
 function ManageProducts() {
   const [title, setTitle] = useState("");
@@ -14,8 +13,6 @@ function ManageProducts() {
   const [categoryId, setCategoryId] = useState("");
   const [editMode, setEditMode] = useState(false);
   const [productId, setProductId] = useState(null);
-  const [searchQuery, setSearchQuery] = useState(""); // New state for search query
-  const [advancedSearchMode, setAdvancedSearchMode] = useState(true);
 
   // ✅ NEW: Filters state
   const [filters, setFilters] = useState({
@@ -81,26 +78,6 @@ function ManageProducts() {
     queryProduct();
   }
 
-  // Memoize filtered products to prevent unnecessary re-renders of the list
-  const filteredProducts = useMemo(() => {
-    if (!storeList) return []; // Handle case where storeList might be null/undefined initially
-
-    // If search query is empty, return all products
-    if (searchQuery.trim() === "") {
-      return storeList;
-    }
-
-    // Filter products based on title (case-insensitive)
-    return storeList.filter((product) =>
-      product.title.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
-  }, [storeList, searchQuery]);
-
-  //fetch catgegory list from server on app load
-  // useEffect(() => {
-  //   console.log(categoryList);
-  // }, [categoryList]);
-
   // Fetch all products on component mount (if not already fetched)
   useEffect(() => {
     queryProduct(
@@ -109,7 +86,7 @@ function ManageProducts() {
       filterPriceFrom,
       filterProductName,
     );
-  }, [currentPage]); 
+  }, [currentPage]);
 
   const updateProductHandler = useCallback(async () => {
     setIsLoading(true);
@@ -231,32 +208,17 @@ function ManageProducts() {
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
       {/* Top action bar: Upload Product & Search */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-        {/* Search Input */}
-        {/* <div className="relative w-full sm:w-1/2 lg:w-1/3">
-          <input
-            type="text"
-            placeholder="Search products by title..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out"
+        <div className="relative w-full sm:w-1/2 lg:w-1/3">
+          <FilterForm
+            filters={filters}
+            setFilters={setFilters}
+            onSearch={handleSearch}
+            onReset={handleReset}
+            categoryList={categoryList}
           />
-          <svg
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            ></path>
-          </svg>
-        </div> */}
+        </div>
+        {/* Upload products */}
 
-        {/* Upload Product Button */}
         <Link
           to="/admin/product-upload"
           className="w-full sm:w-auto text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full shadow-lg transition duration-300 ease-in-out"
@@ -264,15 +226,6 @@ function ManageProducts() {
           ➕ Upload New Product
         </Link>
       </div>
-      {advancedSearchMode && (
-        <FilterForm
-          filters={filters}
-          setFilters={setFilters}
-          onSearch={handleSearch}
-          onReset={handleReset}
-          categoryList={categoryList}
-        />
-      )}
 
       {editMode && (
         <div className="bg-white shadow-xl rounded-lg p-6 mb-8 w-full lg:w-3/4 xl:w-1/2 mx-auto">
@@ -309,7 +262,7 @@ function ManageProducts() {
                 className="block text-gray-700 text-sm font-semibold mb-2"
                 htmlFor="price"
               >
-                Price
+                Selling Price
               </label>
               <input
                 className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out"
@@ -538,65 +491,31 @@ function ManageProducts() {
             </table>
           )}
         </div>
-        <ol className="mt-8 flex justify-center gap-1 text-xs font-medium">
-          <li>
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className={
-                currentPage === 1
-                  ? "cursor-not-allowed inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100 bg-gray-200 text-gray-400"
-                  : "inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100"
-              }
-            >
-              <span className="sr-only">Prev Page</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-3 w-3"
-                viewBox="0 0 20 20"
-                fill="currentColor"
+        {totalPages > 1 && (
+          <div className="mt-12 flex justify-center">
+            <nav className="inline-flex items-center gap-2 rounded-full bg-white px-2 py-2 shadow-sm ring-1 ring-gray-100">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="inline-flex h-10 w-24 items-center justify-center rounded-full text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 hover:bg-gray-50 hover:text-blue-600 text-gray-600"
               >
-                <path
-                  fillRule="evenodd"
-                  d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
-          </li>
+                &larr; Previous
+              </button>
 
-          <li>
-            <div className="block h-8 w-8 rounded border border-gray-100 bg-white text-center leading-8 text-gray-900">
-              {currentPage}
-            </div>
-          </li>
+              <div className="flex items-center justify-center px-4 text-sm font-medium text-gray-700 border-x border-gray-100">
+                Page {currentPage} of {totalPages}
+              </div>
 
-          <li>
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className={
-                currentPage === totalPages
-                  ? "cursor-not-allowed inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100 bg-gray-200 text-gray-400"
-                  : "inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100"
-              }
-            >
-              <span className="sr-only">Next Page</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-3 w-3"
-                viewBox="0 0 20 20"
-                fill="currentColor"
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="inline-flex h-10 w-24 items-center justify-center rounded-full text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 hover:bg-gray-50 hover:text-blue-600 text-gray-600"
               >
-                <path
-                  fillRule="evenodd"
-                  d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
-          </li>
-        </ol>
+                Next &rarr;
+              </button>
+            </nav>
+          </div>
+        )}
       </div>
     </div>
   );
