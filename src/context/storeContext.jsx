@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
 import { jwtDecode } from "jwt-decode";
 
@@ -33,8 +33,6 @@ export const StoreProvider = ({ children }) => {
   const API_URL = import.meta.env.VITE_BACKEND_URL;
   const APP_NAME = import.meta.env.VITE_APP_NAME;
   const token = localStorage.getItem("token");
-
-
 
   // 2. Centralized Logout Function
   // We define this early so we can use it in the useEffect
@@ -76,7 +74,7 @@ export const StoreProvider = ({ children }) => {
       });
 
       if (!response.ok) {
-      return  toast.error("Failed to fetch discount status");
+        return toast.error("Failed to fetch discount status");
       }
 
       const data = await response.json();
@@ -102,14 +100,16 @@ export const StoreProvider = ({ children }) => {
       });
 
       if (!response.ok) {
-       return toast.error("Failed to manage discount status");
+        return toast.error("Failed to manage discount status");
       }
 
       const data = await response.json();
 
       await fetchDiscountStatus(); // Refresh the discount status after managing it
 
-      toast.success(`Discount has been ${status ? "activated" : "deactivated"} successfully!`);
+      toast.success(
+        `Discount has been ${status ? "activated" : "deactivated"} successfully!`,
+      );
     } catch (error) {
       console.log(error);
     }
@@ -696,6 +696,34 @@ export const StoreProvider = ({ children }) => {
     }
   }
 
+  //create category function
+  const createCategory = useCallback(
+    async ( categoryName, description) => {
+      try {
+        const response = await fetch(`${API_URL}/category`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ title: categoryName,  description }),
+        });
+
+        if (!response.ok) {
+          return toast.error("Failed to create category");
+        }
+
+        const data = await response.json();
+        toast.success("Category created successfully!");
+        return data;
+      } catch (error) {
+        console.log(error);
+        toast.error("We are unable to create category at the moment");
+      }
+    },
+    [API_URL, token],
+  );
+
   //handle page change
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
@@ -754,9 +782,10 @@ export const StoreProvider = ({ children }) => {
     setIncreasedPriceInPercentage,
     fetchDiscountStatus,
     editDiscountStatus,
+    createCategory,
   };
 
   return (
     <storeContext.Provider value={contextObj}>{children}</storeContext.Provider>
   );
-};
+};;

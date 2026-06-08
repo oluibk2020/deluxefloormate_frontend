@@ -335,6 +335,12 @@ function AdminDashboard() {
       icon: <FaUsersCog className="w-8 h-8 text-indigo-600" />,
       link: "/admin/manage-roles",
     },
+    isAdmin && {
+      name: "Manage Product Categories",
+      description: "Create, export and manage product categories.",
+      icon: <FaUsersCog className="w-8 h-8 text-indigo-600" />,
+      link: `/admin/shop/manage-categories`,
+    },
     {
       name: "App Settings",
       description: "Manage app settings and configuration.",

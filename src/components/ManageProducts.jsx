@@ -231,11 +231,13 @@ function ManageProducts() {
                 </div>
                 <span
                   className={`text-[10px] uppercase font-black px-2 py-1 rounded-md ${activateDiscount ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}
-                  >
+                >
                   {activateDiscount ? "Active" : "Inactive"}
                 </span>
               </div>
-                  <span className="text-xs text-gray-500">Increase price globally to activate discount on all products</span>
+              <span className="text-xs text-gray-500">
+                Increase price globally to activate discount on all products
+              </span>
 
               <form
                 onSubmit={(e) => {
@@ -439,7 +441,9 @@ function ManageProducts() {
                             {product.title}
                           </p>
                           <p className="text-xs text-gray-500">
-                            Stock: {product.quantity}
+                            Stock: {product.quantity},
+                             {/* Category:
+                            {product.category?.title || "Uncategorized"} */}
                           </p>
                         </div>
                       </div>

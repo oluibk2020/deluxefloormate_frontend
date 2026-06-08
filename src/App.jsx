@@ -27,6 +27,7 @@ import ManageRoles from "./components/ManageRoles";
 import ResetPassword from "./pages/ResetPassword";
 import ResetVerification from "./components/ResetVerification";
 import Setting from "./components/Setting";
+import ManageCategories from "./components/ManageCategories";
 
 function App() {
   const { isAuth, isAdmin, isManager } = useContext(storeContext);
@@ -78,6 +79,10 @@ function App() {
           element={
             isAuth && (isAdmin || isManager) ? <AdminDashboard /> : <Login />
           }
+        />
+        <Route
+          path={"/admin/shop/manage-categories"}
+          element={isAuth && isAdmin ? <ManageCategories /> : <Login />}
         />
         <Route
           path={
